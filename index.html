@@ -39,6 +39,12 @@
     </div>
   </div>
 
+  <div class="page-scroll-indicator" aria-hidden="true">
+    <div class="page-scroll-track">
+      <div class="page-scroll-thumb"></div>
+    </div>
+  </div>
+
   <main>
     <header class="site-header">
       <span>Life is Short</span>
@@ -108,6 +114,26 @@
         <div id="yearly-goals-list" class="goals-list"></div>
       </div>
     </div>
+
+    <section class="sheet-panel" aria-label="Life sheet">
+      <div class="sheet-header">
+        <div class="sheet-toolbar">
+          <h3>Life sheet</h3>
+          <div class="sheet-actions">
+            <button class="small-btn" id="add-sheet-btn" type="button">+ Sheet</button>
+            <button class="small-btn" id="add-sheet-row" type="button">+ Row</button>
+            <button class="small-btn" id="add-sheet-col" type="button">+ Column</button>
+          </div>
+        </div>
+        <div class="sheet-tabs" id="sheet-tabs" aria-label="Sheet tabs"></div>
+      </div>
+      <div class="sheet-wrap">
+        <table class="sheet-table" id="life-sheet"></table>
+      </div>
+      <div class="sheet-footer">
+        <button class="small-btn danger" id="delete-sheet-btn" type="button">Delete</button>
+      </div>
+    </section>
 
     <div class="calendar-container" id="calendar-container" style="display: none;">
       <h1>Life Calendar</h1>
@@ -373,6 +399,292 @@
         hour: '2-digit',
         minute: '2-digit'
       });
+    }
+
+    const SHEET_STORAGE_KEY = 'life_sheet_data_v2';
+    const SHEET_ACTIVE_KEY = 'life_sheet_active_index';
+
+    function createSheet(name, rows = 5, cols = 3) {
+      const data = Array.from({ length: rows }, () => Array.from({ length: cols }, () => ''));
+      return { name, data };
+    }
+
+    function getDefaultSheets() {
+      return [
+        createSheet('Sheet 1', 5, 3),
+        createSheet('Sheet 2', 4, 3)
+      ];
+    }
+
+    function normalizeSheetData(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        return [['', '', '']];
+      }
+
+      return data.map((row) => {
+        const values = Array.isArray(row) ? row.slice() : [''];
+        while (values.length < 3) values.push('');
+        return values;
+      });
+    }
+
+    function loadSheets() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SHEET_STORAGE_KEY) || 'null');
+        if (Array.isArray(saved) && saved.length) {
+          return saved.map((sheet, index) => ({
+            name: typeof sheet.name === 'string' && sheet.name.trim() ? sheet.name.trim() : `Sheet ${index + 1}`,
+            data: normalizeSheetData(sheet.data)
+          }));
+        }
+      } catch (error) {
+        console.warn('Unable to load life sheets', error);
+      }
+      return getDefaultSheets();
+    }
+
+    function saveSheets(sheets) {
+      localStorage.setItem(SHEET_STORAGE_KEY, JSON.stringify(sheets));
+    }
+
+    function getActiveSheetIndex() {
+      const savedIndex = Number(localStorage.getItem(SHEET_ACTIVE_KEY));
+      const sheets = loadSheets();
+      if (!Number.isInteger(savedIndex) || savedIndex < 0 || savedIndex >= sheets.length) {
+        return 0;
+      }
+      return savedIndex;
+    }
+
+    function setActiveSheetIndex(index) {
+      const sheets = loadSheets();
+      if (index < 0 || index >= sheets.length) return;
+      localStorage.setItem(SHEET_ACTIVE_KEY, String(index));
+    }
+
+    function activeSheet() {
+      const sheets = loadSheets();
+      const index = getActiveSheetIndex();
+      return sheets[index] || sheets[0];
+    }
+
+    function renderSheetTabs() {
+      const container = document.getElementById('sheet-tabs');
+      if (!container) return;
+
+      const sheets = loadSheets();
+      const activeIndex = getActiveSheetIndex();
+      container.innerHTML = '';
+
+      sheets.forEach((sheet, index) => {
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = `sheet-tab ${index === activeIndex ? 'active' : ''}`;
+        tab.innerHTML = `${sheet.name} <span class="sheet-tab-rename" data-rename-index="${index}" title="Rename sheet"><i class="fa-solid fa-pen"></i></span>`;
+        tab.addEventListener('click', (event) => {
+          const renameButton = event.target.closest('[data-rename-index]');
+          if (renameButton) {
+            const nextName = window.prompt('Rename sheet', sheet.name);
+            if (nextName && nextName.trim()) {
+              sheet.name = nextName.trim();
+              saveSheets(sheets);
+              renderSheetTabs();
+              renderSheet();
+            }
+            return;
+          }
+          setActiveSheetIndex(index);
+          renderSheetTabs();
+          renderSheet();
+        });
+        container.appendChild(tab);
+      });
+    }
+
+    function addSheet() {
+      const sheets = loadSheets();
+      const newIndex = sheets.length + 1;
+      sheets.push(createSheet(`Sheet ${newIndex}`));
+      saveSheets(sheets);
+      setActiveSheetIndex(sheets.length - 1);
+      renderSheetTabs();
+      renderSheet();
+    }
+
+    function deleteSheet() {
+      const sheets = loadSheets();
+      const activeIndex = getActiveSheetIndex();
+      const targetName = sheets[activeIndex]?.name || 'current sheet';
+      if (!confirm(`Delete "${targetName}"?`)) {
+        return;
+      }
+
+      if (sheets.length <= 1) {
+        saveSheets([createSheet('Sheet 1')]);
+        setActiveSheetIndex(0);
+      } else {
+        sheets.splice(activeIndex, 1);
+        saveSheets(sheets);
+        setActiveSheetIndex(Math.max(0, activeIndex - 1));
+      }
+      renderSheetTabs();
+      renderSheet();
+    }
+
+    function renderSheet() {
+      const table = document.getElementById('life-sheet');
+      if (!table) return;
+
+      const sheets = loadSheets();
+      const activeIndex = getActiveSheetIndex();
+      const sheet = sheets[activeIndex] || sheets[0];
+      if (!sheet) return;
+
+      const data = normalizeSheetData(sheet.data);
+      const columnCount = Math.max(...data.map(row => row.length), 1);
+      const headerLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
+      const columnLabels = headerLabels.slice(0, columnCount);
+
+      table.innerHTML = '';
+
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+
+      const rowHeaderCell = document.createElement('th');
+      rowHeaderCell.textContent = '';
+      headerRow.appendChild(rowHeaderCell);
+
+      columnLabels.forEach((label, index) => {
+        const th = document.createElement('th');
+        th.setAttribute('scope', 'col');
+        th.dataset.colIndex = String(index);
+        th.innerHTML = `<span>${label}</span> <button class="sheet-header-action" type="button" data-remove-col="${index}" title="Delete column">×</button>`;
+        headerRow.appendChild(th);
+      });
+
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      data.forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
+        const rowLabel = document.createElement('th');
+        rowLabel.setAttribute('scope', 'row');
+        rowLabel.innerHTML = `<span>${rowIndex + 1}</span> <button class="sheet-row-delete" type="button" data-remove-row="${rowIndex}" title="Delete row">×</button>`;
+        tr.appendChild(rowLabel);
+
+        row.forEach((cellValue, colIndex) => {
+          const td = document.createElement('td');
+          const cell = document.createElement('div');
+          cell.className = 'sheet-cell';
+          cell.contentEditable = 'true';
+          cell.dataset.rowIndex = String(rowIndex);
+          cell.dataset.colIndex = String(colIndex);
+          cell.textContent = cellValue || '';
+          td.appendChild(cell);
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+
+      document.querySelectorAll('[data-remove-row]').forEach((button) => {
+        button.addEventListener('click', (event) => {
+          const rowIndex = Number(event.currentTarget.dataset.removeRow);
+          deleteSheetRow(rowIndex);
+        });
+      });
+
+      document.querySelectorAll('[data-remove-col]').forEach((button) => {
+        button.addEventListener('click', (event) => {
+          const colIndex = Number(event.currentTarget.dataset.removeCol);
+          deleteSheetColumn(colIndex);
+        });
+      });
+    }
+
+    function updateSheetCell(rowIndex, colIndex, value) {
+      const sheets = loadSheets();
+      const activeIndex = getActiveSheetIndex();
+      const sheet = sheets[activeIndex] || sheets[0];
+      if (!sheet || !sheet.data[rowIndex]) return;
+      while (sheet.data[rowIndex].length <= colIndex) sheet.data[rowIndex].push('');
+      sheet.data[rowIndex][colIndex] = value;
+      saveSheets(sheets);
+    }
+
+    function addSheetRow() {
+      const sheets = loadSheets();
+      const activeIndex = getActiveSheetIndex();
+      const sheet = sheets[activeIndex] || sheets[0];
+      if (!sheet) return;
+      const columnCount = Math.max(...sheet.data.map(row => row.length), 1);
+      sheet.data.push(Array(columnCount).fill(''));
+      saveSheets(sheets);
+      renderSheet();
+    }
+
+    function deleteSheetRow(rowIndex) {
+      const sheets = loadSheets();
+      const activeIndex = getActiveSheetIndex();
+      const sheet = sheets[activeIndex] || sheets[0];
+      if (!sheet || sheet.data.length <= 1) return;
+      sheet.data.splice(rowIndex, 1);
+      saveSheets(sheets);
+      renderSheet();
+    }
+
+    function addSheetColumn() {
+      const sheets = loadSheets();
+      const activeIndex = getActiveSheetIndex();
+      const sheet = sheets[activeIndex] || sheets[0];
+      if (!sheet) return;
+      sheet.data.forEach(row => row.push(''));
+      saveSheets(sheets);
+      renderSheet();
+    }
+
+    function deleteSheetColumn(colIndex) {
+      const sheets = loadSheets();
+      const activeIndex = getActiveSheetIndex();
+      const sheet = sheets[activeIndex] || sheets[0];
+      if (!sheet || sheet.data[0].length <= 1) return;
+      sheet.data = sheet.data.map(row => row.filter((_, index) => index !== colIndex));
+      saveSheets(sheets);
+      renderSheet();
+    }
+
+    document.addEventListener('input', function (event) {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.classList.contains('sheet-cell')) return;
+      const rowIndex = Number(target.dataset.rowIndex);
+      const colIndex = Number(target.dataset.colIndex);
+      if (Number.isInteger(rowIndex) && Number.isInteger(colIndex)) {
+        updateSheetCell(rowIndex, colIndex, target.textContent || '');
+      }
+    });
+
+    document.getElementById('add-sheet-btn').addEventListener('click', addSheet);
+    document.getElementById('delete-sheet-btn').addEventListener('click', deleteSheet);
+    document.getElementById('add-sheet-row').addEventListener('click', addSheetRow);
+    document.getElementById('add-sheet-col').addEventListener('click', addSheetColumn);
+
+    const pageScrollIndicator = document.querySelector('.page-scroll-indicator');
+    const pageScrollThumb = document.querySelector('.page-scroll-thumb');
+    if (pageScrollIndicator && pageScrollThumb) {
+      const updatePageScrollIndicator = () => {
+        const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollRatio = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
+        const trackHeight = pageScrollIndicator.querySelector('.page-scroll-track').clientHeight;
+        const thumbHeight = pageScrollThumb.offsetHeight;
+        pageScrollThumb.style.transform = `translateY(${Math.min(scrollRatio * (trackHeight - thumbHeight), trackHeight - thumbHeight)}px)`;
+        pageScrollIndicator.classList.toggle('visible', scrollableHeight > 0);
+      };
+      window.addEventListener('scroll', updatePageScrollIndicator, { passive: true });
+      window.addEventListener('resize', updatePageScrollIndicator);
+      updatePageScrollIndicator();
     }
 
     // Goals management
@@ -682,6 +994,8 @@
     setDateTime();
     setProgress(false);
     setDailyQuote();
+    renderSheetTabs();
+    renderSheet();
     loadGoals();
   </script>
 </body>

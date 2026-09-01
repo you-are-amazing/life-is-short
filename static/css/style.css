@@ -114,7 +114,42 @@ p {
   width: 220px;
 }
 
+.page-scroll-indicator {
+  position: fixed;
+  top: 24%;
+  left: 74px;
+  width: 6px;
+  height: 180px;
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.page-scroll-indicator.visible {
+  opacity: 1;
+}
+
+.page-scroll-track {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.22);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  overflow: hidden;
+}
+
+.page-scroll-thumb {
+  width: 100%;
+  height: 38px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--primary-light), var(--primary-color));
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.45);
+  transition: transform 120ms linear;
+}
+
 .sidebar-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -736,6 +771,10 @@ main.expanded {
   box-shadow: var(--shadow-sm);
 }
 
+.small-btn.danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
 .small-btn:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
@@ -852,6 +891,211 @@ main.expanded {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.sheet-panel {
+  margin-top: 2rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.sheet-header {
+  padding: 0;
+}
+
+.sheet-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg, var(--surface-color), var(--surface-hover));
+}
+
+.sheet-toolbar h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.sheet-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: var(--surface-color);
+}
+
+.sheet-tab {
+  appearance: none;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sheet-tab:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.sheet-tab.active {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.sheet-tab-rename {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  color: inherit;
+  opacity: 0.75;
+  transition: all var(--transition-fast);
+}
+
+.sheet-tab-rename:hover {
+  background: rgba(255, 255, 255, 0.18);
+  opacity: 1;
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.sheet-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1rem 1rem;
+}
+
+.sheet-wrap {
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+.sheet-table {
+  width: 100%;
+  min-width: 700px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.sheet-table thead th,
+.sheet-table tbody th,
+.sheet-table tbody td {
+  height: 2.45rem;
+  border: 1px solid var(--border-color);
+  padding: 0.35rem 0.55rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.sheet-table thead th {
+  height: 2.2rem;
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.sheet-table thead th:first-child,
+.sheet-table tbody th {
+  width: 76px;
+}
+
+.sheet-table tbody th {
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--surface-hover);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sheet-table td {
+  min-width: 140px;
+}
+
+.sheet-cell {
+  width: 100%;
+  min-height: 1.75rem;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font: inherit;
+  padding: 0.15rem 0;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sheet-cell:focus {
+  background: rgba(99, 102, 241, 0.06);
+  border-radius: 0.25rem;
+}
+
+.sheet-header-action {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.sheet-header-action:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--error-color);
+}
+
+.sheet-row-delete {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  transition: all var(--transition-fast);
+}
+
+.sheet-row-delete:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--error-color);
 }
 
 /* Quote Section */
