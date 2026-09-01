@@ -4,6 +4,8 @@ Originally created by [Twisha Patel](https://github.com/twi-exe).
 
 A web application that tracks your progress through life (year, month, week) and helps you manage your goals with a robust database backend and secure user authentication.
 
+Link : https://you-are-amazing.github.io/life-is-short/ 
+
 ## Features
 
 - **Progress Tracking**: Visual progress bars for year, month, and week completion

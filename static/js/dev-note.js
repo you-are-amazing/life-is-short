@@ -22,7 +22,7 @@
       '    <p>I, <strong>Darshan Parmar</strong>, have modified this instance of the project purely for my own personal use, to fit my day-to-day workflow. The idea, design, and original build remain entirely Twisha Patel&rsquo;s work.</p>',
       '    <p>Sincere thanks to <strong>Twisha Patel</strong> for creating and sharing such a thoughtful concept, it stands entirely on her original work.</p>',
       '    <div class="dev-note-credits">',
-      '      <a href="https://github.com/twi-exe" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> Created by Twisha Patel </a>',
+      '      <a href="https://github.com/twi-exe" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> Originally reated by Twisha Patel </a>',
       '    </div>',
       '    <p class="dev-note-quote">Life is short. Make it meaningful, track your journey, work toward your dreams, and preserve the progress you make along the way.</p>',
       '    <div class="dev-note-signature" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.1); font-size: 0.9rem; color: #666;">',
