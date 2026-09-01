@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Life Calendar - Life is Short</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../favicon.png" type="image/png">
+  <link rel="stylesheet" href="../static/css/style.css?v=17">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="../static/js/dev-note.js" defer></script>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header"><button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></div>
+    <div class="sidebar-content">
+      <a href="../index.html" class="sidebar-link" title="Home" aria-label="Home"><i class="fa-solid fa-house"></i></a>
+      <a href="../notepad/" class="sidebar-link" title="Notepad" aria-label="Notepad"><i class="fa-solid fa-book"></i></a>
+
+      <div class="sidebar-bottom" style="margin-top: auto; display: flex; flex-direction: column; align-items: center; width: 100%;">
+        <button class="sidebar-link" id="theme-toggle" title="Switch to light mode" aria-label="Switch to light mode" aria-pressed="true"><i class="fa-solid fa-sun"></i></button>
+        <button class="refresh-btn" id="refresh-btn" title="Reset all saved data" aria-label="Reset all saved data" style="margin-top: 0;"><i class="fa-solid fa-rotate-left"></i></button>
+      </div>
+    </div>
+  </div>
+  <main>
+    <header class="site-header">
+      <span>Life Calendar</span>
+      <a class="credit-link" href="https://github.com/twi-exe" target="_blank" rel="noopener noreferrer" title="Original concept and project by Twisha Patel">
+        <i class="fa-brands fa-github"></i> Created by Twisha Patel
+      </a>
+    </header>
+    <section class="calendar-container">
+      <h1>Life Calendar</h1>
+      <p class="calendar-description">Each square represents one week of your life. Darker squares show weeks that have passed.<br><strong id="weeks-lived">0</strong> weeks lived out of <strong id="total-weeks">0</strong> weeks in your expected lifespan.</p>
+      <div class="calendar-controls">
+        <label for="birthdate">Birth Date:</label><input type="date" id="birthdate">
+        <label for="lifespan">Expected Lifespan:</label><input type="number" id="lifespan" min="1" max="120">
+        <button id="update-calendar" class="small-btn">Update Calendar</button>
+      </div>
+      <div id="today-date-display" style="text-align: center; color: var(--text-muted); margin-bottom: 1rem; font-weight: 500; font-size: 0.9rem;"></div>
+      <div class="calendar-legend" aria-label="Calendar legend">
+        <span><i class="legend-swatch lived"></i> Weeks lived</span>
+        <span><i class="legend-swatch current"></i> Current week</span>
+        <span><i class="legend-swatch remaining"></i> Weeks ahead</span>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="calendar-stats">
+        <div class="stat-item"><div class="stat-number" id="years-lived">0</div><div class="stat-label">Years Lived</div></div>
+        <div class="stat-item"><div class="stat-number" id="years-remaining">0</div><div class="stat-label">Years Remaining</div></div>
+        <div class="stat-item"><div class="stat-number" id="percentage-lived">0%</div><div class="stat-label">Life Completed</div></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const birthdateInput = document.getElementById('birthdate');
+    const lifespanInput = document.getElementById('lifespan');
+    birthdateInput.value = localStorage.getItem('calendarBirthdate') || '1990-01-01';
+    lifespanInput.value = localStorage.getItem('calendarLifespan') || '80';
+
+    function applyTheme(theme) {
+      const dark = theme === 'dark';
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      const toggle = document.getElementById('theme-toggle');
+      toggle.setAttribute('aria-pressed', String(dark));
+      toggle.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+      toggle.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+      toggle.innerHTML = `<i class="fa-solid fa-${dark ? 'sun' : 'moon'}"></i>`;
+    }
+    applyTheme(localStorage.getItem('theme') || 'dark');
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', theme);
+      applyTheme(theme);
+    });
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+      const shouldReset = confirm('This will erase all saved goals, calendar data, and preferences. Continue?');
+      if (shouldReset) {
+        localStorage.clear();
+        window.location.reload();
+      }
+    });
+    const sidebar = document.querySelector('.sidebar');
+    const main = document.querySelector('main');
+    // Sidebar always starts collapsed on every load; it no longer remembers a previous state.
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      sidebar.classList.toggle('expanded'); main.classList.toggle('expanded');
+    });
+
+    function generateCalendar() {
+      const birth = new Date(`${birthdateInput.value}T00:00:00`);
+      const lifespan = Number(lifespanInput.value);
+      const grid = document.getElementById('calendar-grid');
+      const now = new Date();
+      grid.innerHTML = '';
+      let livedWeeks = 0;
+      
+      document.getElementById('today-date-display').textContent = `Today: ${now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+
+      // Rows are aligned to real calendar years (Jan 1 - Dec 31) so that "today"
+      // always falls under the row labeled with the actual current year, instead
+      // of a row based on the birthday anniversary (which could be off by one
+      // year if the birthday hasn't occurred yet this year).
+      const birthYear = birth.getFullYear();
+      for (let age = 0; age < lifespan; age++) {
+        const calendarYear = birthYear + age;
+        const start = new Date(calendarYear, 0, 1);
+        const end = new Date(calendarYear + 1, 0, 1);
+        const row = document.createElement('div'); row.className = 'calendar-year';
+        const label = document.createElement('span');
+        label.className = 'calendar-year-label';
+        label.textContent = calendarYear;
+        row.appendChild(label);
+        const weeks = Math.round((end - start) / 604800000);
+        for (let week = 0; week < weeks; week++) {
+          const weekStart = new Date(start); weekStart.setDate(start.getDate() + week * 7);
+          const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 7);
+          const square = document.createElement('div'); square.className = 'calendar-week';
+          if (weekEnd <= birth) {
+            // Weeks before the person was born: keep as an invisible spacer
+            // so week columns still line up across rows.
+            square.classList.add('remaining');
+            square.style.visibility = 'hidden';
+          } else if (weekEnd <= now) { square.classList.add('lived'); livedWeeks++; }
+          else if (weekStart <= now && now < weekEnd) { square.classList.add('current'); livedWeeks++; }
+          else square.classList.add('remaining');
+          row.appendChild(square);
+        }
+        const rightLabel = document.createElement('span');
+        rightLabel.className = 'calendar-age-label';
+        rightLabel.textContent = 'Age ' + age;
+        row.appendChild(rightLabel);
+        grid.appendChild(row);
+      }
+      const lifeEnd = new Date(birth); lifeEnd.setFullYear(birth.getFullYear() + lifespan);
+      const totalWeeks = Math.round((lifeEnd - birth) / 604800000);
+      const yearsLived = Math.min(lifespan, Math.floor(livedWeeks / 52.14));
+      document.getElementById('weeks-lived').textContent = livedWeeks.toLocaleString();
+      document.getElementById('total-weeks').textContent = totalWeeks.toLocaleString();
+      document.getElementById('years-lived').textContent = yearsLived;
+      document.getElementById('years-remaining').textContent = Math.max(0, lifespan - yearsLived);
+      document.getElementById('percentage-lived').textContent = `${Math.min(100, livedWeeks / totalWeeks * 100).toFixed(1)}%`;
+    }
+    document.getElementById('update-calendar').addEventListener('click', () => {
+      localStorage.setItem('calendarBirthdate', birthdateInput.value);
+      localStorage.setItem('calendarLifespan', lifespanInput.value);
+      generateCalendar();
+    });
+    generateCalendar();
+  </script>
+</body>
+</html>

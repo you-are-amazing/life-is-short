@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Life is Short – Progress Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+        <div class="sidebar-title-vertical">Life is Short</div>
+      </button>
+    </div>
+
+    <div class="sidebar-content">
+      <button class="refresh-btn" id="refresh-btn" title="Refresh progress" aria-label="Refresh">
+        <i class="fa-solid fa-rotate-left"></i>
+      </button>
+      <button class="sidebar-link" id="theme-toggle" title="Switch to dark mode" aria-label="Switch to dark mode" aria-pressed="false">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      <input type="color" id="accent-color-picker" title="Choose accent color" value="#f59e0b" style="width: 40px; height: 40px; border: none; border-radius: 50%; cursor: pointer; margin-bottom: 1rem;">
+      <button class="sidebar-link" onclick="toggleCalendar()" title="Life Calendar" aria-label="Life Calendar">
+        <i class="fa-solid fa-calendar"></i>
+      </button>
+      <div class="user-info" id="user-info">
+        <!-- User info will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="datetime" id="datetime"></div>
+
+    <div class="progress-group">
+      <div class="progress-label" id="progress-label-year">Loading...</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-bar-year"></div>
+        <span class="progress-badge" id="progress-badge-year"></span>
+      </div>
+    </div>
+
+    <div class="progress-group">
+      <div class="progress-label" id="progress-label-month">Loading...</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-bar-month"></div>
+        <span class="progress-badge" id="progress-badge-month"></span>
+      </div>
+    </div>
+
+    <div class="progress-group">
+      <div class="progress-label" id="progress-label-week">Loading...</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-bar-week"></div>
+        <span class="progress-badge" id="progress-badge-week"></span>
+      </div>
+    </div>
+
+    <div class="goals-container">
+      <div class="goals-section">
+        <div class="goals-header">
+          <h3>Daily Goals</h3>
+          <button class="small-btn" onclick="addGoal('daily')">+</button>
+        </div>
+        <div id="daily-goals-list" class="goals-list"></div>
+      </div>
+
+      <div class="goals-section">
+        <div class="goals-header">
+          <h3>Weekly Goals</h3>
+          <button class="small-btn" onclick="addGoal('weekly')">+</button>
+        </div>
+        <div id="weekly-goals-list" class="goals-list"></div>
+      </div>
+
+      <div class="goals-section">
+        <div class="goals-header">
+          <h3>Monthly Goals</h3>
+          <button class="small-btn" onclick="addGoal('monthly')">+</button>
+        </div>
+        <div id="monthly-goals-list" class="goals-list"></div>
+      </div>
+
+      <div class="goals-section yearly-goals">
+        <div class="goals-header">
+          <h3>Yearly Goals</h3>
+          <button class="small-btn" onclick="addGoal('yearly')">+</button>
+        </div>
+        <div id="yearly-goals-list" class="goals-list"></div>
+      </div>
+    </div>
+
+    <div class="calendar-container" id="calendar-container" style="display: none;">
+      <h1>Life Calendar</h1>
+      <p class="calendar-description">
+        Each square represents one week of your life. The darker squares show weeks that have passed.
+        <br>
+        <strong id="weeks-lived">0</strong> weeks lived out of <strong id="total-weeks">0</strong> weeks in a typical lifespan.
+      </p>
+
+      <div class="calendar-controls">
+        <label for="birthdate">Birth Date:</label>
+        <input type="date" id="birthdate" value="1990-01-01">
+        <label for="lifespan">Expected Lifespan (years):</label>
+        <input type="number" id="lifespan" value="80" min="1" max="120">
+        <button id="update-calendar" class="small-btn">Update</button>
+      </div>
+
+      <div class="calendar-grid" id="calendar-grid">
+        <!-- Calendar weeks will be generated here -->
+      </div>
+
+      <div class="calendar-stats">
+        <div class="stat-item">
+          <div class="stat-number" id="years-lived">0</div>
+          <div class="stat-label">Years Lived</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="years-remaining">0</div>
+          <div class="stat-label">Years Remaining</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="percentage-lived">0%</div>
+          <div class="stat-label">Life Completed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote" id="quote" title="Click to copy quote">
+      "The trouble is, you think you have time." – Jack Kornfield
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-ticker" aria-label="Project credits and thank-you message">
+      <div class="footer-ticker-track">
+        <span aria-hidden="true">&bull;</span>
+        <span>Thank you for making this a productive project.</span>
+        <span aria-hidden="true">&bull;</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Custom dialog for adding goals -->
+  <dialog id="add-goal-dialog" class="goal-dialog">
+    <form method="dialog" id="add-goal-form">
+      <h3 id="dialog-title">Add New Goal</h3>
+      <label for="goal-text">Goal Description:</label>
+      <input type="text" id="goal-text" required placeholder="Enter your goal...">
+      <div class="dialog-buttons">
+        <button type="submit" class="dialog-btn primary">Add Goal</button>
+        <button type="button" class="dialog-btn secondary" onclick="closeGoalDialog()">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    // Restore the chosen color mode before initializing the page.
+    function setTheme(theme) {
+      const toggle = document.getElementById('theme-toggle');
+      const isDark = theme === 'dark';
+      document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+      toggle.setAttribute('aria-pressed', String(isDark));
+      toggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+      toggle.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+      toggle.innerHTML = `<i class="fa-solid fa-${isDark ? 'sun' : 'moon'}"></i>`;
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', nextTheme);
+      setTheme(nextTheme);
+    });
+
+    // Show current date/time
+    function setDateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      document.getElementById('datetime').textContent = now.toLocaleString(undefined, options);
+    }
+
+    // Calculate year progress
+    function getYearProgress() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear() + 1, 0, 1);
+      const percent = ((now - start) / (end - start)) * 100;
+      return percent;
+    }
+
+    // Calculate month progress
+    function getMonthProgress() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const percent = ((now - start) / (end - start)) * 100;
+      return percent;
+    }
+
+    // Calculate week progress (Monday is start of week)
+    function getWeekProgress() {
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sunday
+      const daysSinceMonday = (day + 6) % 7;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - daysSinceMonday);
+      monday.setHours(0,0,0,0);
+      const nextMonday = new Date(monday);
+      nextMonday.setDate(monday.getDate() + 7);
+      const percent = ((now - monday) / (nextMonday - monday)) * 100;
+      return percent;
+    }
+
+    function setProgress(animated = true) {
+      // Year
+      const yearPercent = getYearProgress();
+      document.getElementById('progress-label-year').textContent =
+        `Year is ${yearPercent.toFixed(2)}% complete`;
+      const yearBar = document.getElementById('progress-bar-year');
+      yearBar.setAttribute('data-tooltip', `${yearPercent.toFixed(2)}%`);
+      document.getElementById('progress-badge-year').textContent = `${yearPercent.toFixed(1)}%`;
+      if (animated) {
+        yearBar.style.width = '0';
+        setTimeout(() => { yearBar.style.width = yearPercent + '%'; }, 100);
+      } else {
+        yearBar.style.width = yearPercent + '%';
+      }
+
+      // Month
+      const monthPercent = getMonthProgress();
+      document.getElementById('progress-label-month').textContent =
+        `Month is ${monthPercent.toFixed(2)}% complete`;
+      const monthBar = document.getElementById('progress-bar-month');
+      monthBar.setAttribute('data-tooltip', `${monthPercent.toFixed(2)}%`);
+      document.getElementById('progress-badge-month').textContent = `${monthPercent.toFixed(1)}%`;
+      if (animated) {
+        monthBar.style.width = '0';
+        setTimeout(() => { monthBar.style.width = monthPercent + '%'; }, 100);
+      } else {
+        monthBar.style.width = monthPercent + '%';
+      }
+
+      // Week
+      const weekPercent = getWeekProgress();
+      document.getElementById('progress-label-week').textContent =
+        `Week is ${weekPercent.toFixed(2)}% complete`;
+      const weekBar = document.getElementById('progress-bar-week');
+      weekBar.setAttribute('data-tooltip', `${weekPercent.toFixed(2)}%`);
+      document.getElementById('progress-badge-week').textContent = `${weekPercent.toFixed(1)}%`;
+      if (animated) {
+        weekBar.style.width = '0';
+        setTimeout(() => { weekBar.style.width = weekPercent + '%'; }, 100);
+      } else {
+        weekBar.style.width = weekPercent + '%';
+      }
+    }
+    // Calculate month progress
+    function getMonthProgress() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const percent = ((now - start) / (end - start)) * 100;
+      return percent;
+    }
+
+    // Calculate week progress (Monday is start of week)
+    function getWeekProgress() {
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sunday
+      // Calculate days since Monday
+      const daysSinceMonday = (day + 6) % 7;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - daysSinceMonday);
+      monday.setHours(0,0,0,0);
+      const nextMonday = new Date(monday);
+      nextMonday.setDate(monday.getDate() + 7);
+      const percent = ((now - monday) / (nextMonday - monday)) * 100;
+      return percent;
+    }
+
+    function setProgress() {
+      // Year
+      const yearPercent = getYearProgress();
+      document.getElementById('progress-label-year').textContent =
+        `Year is ${yearPercent.toFixed(2)}% complete`;
+      document.getElementById('progress-bar-year').style.width = yearPercent + '%';
+
+      // Month
+      const monthPercent = getMonthProgress();
+      document.getElementById('progress-label-month').textContent =
+        `Month is ${monthPercent.toFixed(2)}% complete`;
+      document.getElementById('progress-bar-month').style.width = monthPercent + '%';
+
+      // Week
+      const weekPercent = getWeekProgress();
+      document.getElementById('progress-label-week').textContent =
+        `Week is ${weekPercent.toFixed(2)}% complete`;
+      document.getElementById('progress-bar-week').style.width = weekPercent + '%';
+    }
+
+    setProgress();
+
+    // Motivational quotes (rotate daily)
+    const quotes = [
+      "The trouble is, you think you have time. – Jack Kornfield",
+      "Don't count the days, make the days count. – Muhammad Ali",
+      "Lost time is never found again. – Benjamin Franklin",
+      "Do not squander time, for that's the stuff life is made of. – Benjamin Franklin",
+      "You only live once, but if you do it right, once is enough. – Mae West"
+    ];
+    function setDailyQuote() {
+      const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+      const quote = quotes[dayOfYear % quotes.length];
+      const quoteEl = document.getElementById('quote');
+      quoteEl.textContent = quote;
+      quoteEl.classList.remove('copied');
+    }
+
+    // Refresh button
+    document.getElementById('refresh-btn').onclick = function() {
+      setDateTime();
+      setProgress(true);
+      setDailyQuote();
+    };
+
+    // Quote copy interaction
+    document.getElementById('quote').onclick = function() {
+      const quoteText = this.textContent;
+      navigator.clipboard.writeText(quoteText).then(() => {
+        this.classList.add('copied');
+        this.textContent = "Copied!";
+        setTimeout(() => {
+          setDailyQuote();
+        }, 900);
+      });
+    };
+
+    // Remove these blocks from your script section:
+
+    /* Remove this entire function
+    function updateRemaining() {
+      const now = new Date();
+      
+      // Year remaining
+      const yearEnd = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+      const daysInYear = Math.ceil((yearEnd - now) / (1000 * 60 * 60 * 24));
+      document.getElementById('days-year').textContent = daysInYear;
+      
+      // Month remaining
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      const daysInMonth = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24));
+      document.getElementById('days-month').textContent = daysInMonth;
+      
+      // Week remaining (until Sunday)
+      const daysUntilSunday = 7 - now.getDay();
+      const weekEnd = new Date(now);
+      weekEnd.setDate(now.getDate() + daysUntilSunday);
+      weekEnd.setHours(23, 59, 59, 999);
+      const daysInWeek = Math.ceil((weekEnd - now) / (1000 * 60 * 60 * 24));
+      document.getElementById('days-week').textContent = daysInWeek;
+    }
+    */
+
+    /* Remove these lines from the initialization section
+    updateRemaining();
+    setInterval(updateRemaining, 60000);
+    */
+
+    // Add this function before initializeGoals()
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString(undefined, { 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // User management
+    let currentUser = { is_anonymous: true, display_name: 'Guest' };
+
+    // Goals management
+    let goals = [];
+    let currentGoalType = '';
+
+    function loadGoals() {
+      goals = JSON.parse(localStorage.getItem('goals') || '[]');
+      renderAllGoals();
+    }
+
+    function saveGoals() {
+      localStorage.setItem('goals', JSON.stringify(goals));
+    }
+
+    function renderAllGoals() {
+      const goalsByType = { daily: [], weekly: [], monthly: [], yearly: [] };
+      goals.forEach(goal => {
+        if (goalsByType[goal.goal_type]) {
+          goalsByType[goal.goal_type].push(goal);
+        }
+      });
+      Object.keys(goalsByType).forEach(type => {
+        renderGoalsList(type, goalsByType[type]);
+      });
+    }
+
+    function loadCurrentUser() {
+      updateUserInterface();
+    }
+
+    function updateUserInterface() {
+      const userInfo = document.getElementById('user-info');
+      userInfo.innerHTML = `
+        <div class="username">${currentUser.display_name}</div>
+        <div class="guest-badge">GUEST</div>
+      `;
+    }
+
+    async function logout() {
+      try {
+        await fetch('/logout', { method: 'POST' });
+        currentUser = { is_anonymous: true };
+        updateUserInterface();
+        loadGoals(); // Reload goals for guest session
+      } catch (error) {
+        console.error('Error logging out:', error);
+      }
+    }
+
+    function showConvertGuestDialog() {
+      const username = prompt('Choose a username (min 3 characters):');
+      if (!username || username.length < 3) return;
+      
+      const password = prompt('Choose a password (min 6 characters):');
+      if (!password || password.length < 6) return;
+      
+      convertGuest(username, password);
+    }
+
+    async function convertGuest(username, password) {
+      try {
+        const response = await fetch('/api/user/convert-guest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        if (response.ok) {
+          currentUser = await response.json();
+          updateUserInterface();
+          alert('Account created successfully!');
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Error creating account');
+        }
+      } catch (error) {
+        console.error('Error converting guest:', error);
+        alert('Network error. Please try again.');
+      }
+    }
+
+
+
+    function addGoal(type) {
+      currentGoalType = type;
+      document.getElementById('dialog-title').textContent = `Add New ${type.charAt(0).toUpperCase() + type.slice(1)} Goal`;
+      document.getElementById('goal-text').value = '';
+      document.getElementById('add-goal-dialog').showModal();
+    }
+
+    function createGoal(text, type) {
+      const newGoal = {
+        id: Date.now(),
+        text: text,
+        goal_type: type,
+        done: false,
+        created: new Date().toISOString()
+      };
+      goals.push(newGoal);
+      saveGoals();
+      loadGoals();
+    }
+
+    function renderGoalsList(type, goals) {
+      const list = document.getElementById(`${type}-goals-list`);
+
+      list.innerHTML = goals.map(goal => `
+        <div class="goal-item ${goal.done ? 'completed' : ''}" data-id="${goal.id}">
+          <input type="checkbox" class="goal-checkbox"
+            ${goal.done ? 'checked' : ''}
+            onchange="toggleGoal(${goal.id})">
+          <span class="goal-text" style="${goal.done ? 'text-decoration: line-through; color: #666;' : ''}">${goal.text}</span>
+          <span class="goal-date">${formatDate(goal.created)}</span>
+          <button class="goal-btn" onclick="deleteGoal(${goal.id})">×</button>
+        </div>
+      `).join('');
+    }
+
+    function toggleGoal(id) {
+      const goal = goals.find(g => g.id === id);
+      if (goal) {
+        goal.done = !goal.done;
+        saveGoals();
+        loadGoals();
+      }
+    }
+
+    function deleteGoal(id) {
+      if (confirm('Delete this goal?')) {
+        goals = goals.filter(g => g.id !== id);
+        saveGoals();
+        loadGoals();
+      }
+    }
+
+    // Clean up old goals
+    async function cleanupOldGoals() {
+      try {
+        await fetch('/api/goals/cleanup', { method: 'POST' });
+      } catch (error) {
+        console.error('Error cleaning up goals:', error);
+      }
+    }
+
+    // Sidebar toggle functionality
+    function initSidebarToggle() {
+      const sidebar = document.querySelector('.sidebar');
+      const toggleBtn = document.getElementById('sidebar-toggle');
+      const main = document.querySelector('main');
+
+      // Load saved state from localStorage
+      const isExpanded = localStorage.getItem('sidebarExpanded') === 'true';
+      if (isExpanded) {
+        sidebar.classList.add('expanded');
+        main.classList.add('expanded');
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('expanded');
+        main.classList.toggle('expanded');
+        const expanded = sidebar.classList.contains('expanded');
+        localStorage.setItem('sidebarExpanded', expanded);
+      });
+    }
+
+    // Goal dialog functionality
+    function closeGoalDialog() {
+      document.getElementById('add-goal-dialog').close();
+    }
+
+    document.getElementById('add-goal-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const goalText = document.getElementById('goal-text').value.trim();
+      if (goalText) {
+        createGoal(goalText, currentGoalType);
+        closeGoalDialog();
+      }
+    });
+
+    // Calendar functionality
+    function toggleCalendar() {
+      const calendar = document.getElementById('calendar-container');
+      const isVisible = calendar.style.display !== 'none';
+      calendar.style.display = isVisible ? 'none' : 'block';
+      if (!isVisible) {
+        // Initialize calendar if showing
+        const birthdate = document.getElementById('birthdate').value;
+        const lifespan = parseInt(document.getElementById('lifespan').value);
+        generateCalendar(birthdate, lifespan);
+      }
+    }
+
+    function generateCalendar(birthDate, lifespanYears) {
+      const grid = document.getElementById('calendar-grid');
+      const now = new Date();
+      const birth = new Date(birthDate);
+
+      // Clear existing grid
+      grid.innerHTML = '';
+
+      let totalWeeksLived = 0;
+
+      // Create rows for each year of life
+      for (let year = 0; year < lifespanYears; year++) {
+        const yearStart = new Date(birth);
+        yearStart.setFullYear(birth.getFullYear() + year);
+
+        const yearEnd = new Date(birth);
+        yearEnd.setFullYear(birth.getFullYear() + year + 1);
+
+        // Calculate weeks in this year
+        const weeksInYear = Math.round((yearEnd - yearStart) / (1000 * 60 * 60 * 24 * 7));
+
+        // Create year container
+        const yearContainer = document.createElement('div');
+        yearContainer.className = 'calendar-year';
+
+        // Create week elements for this year
+        for (let week = 0; week < weeksInYear; week++) {
+          const weekStart = new Date(yearStart);
+          weekStart.setDate(yearStart.getDate() + (week * 7));
+
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 7);
+
+          const weekElement = document.createElement('div');
+          weekElement.className = 'calendar-week';
+
+          // Check if this week has been lived
+          if (weekEnd <= now) {
+            weekElement.classList.add('lived');
+            totalWeeksLived++;
+          } else if (weekStart <= now && now < weekEnd) {
+            weekElement.classList.add('current');
+            totalWeeksLived++;
+          } else {
+            weekElement.classList.add('remaining');
+          }
+
+          yearContainer.appendChild(weekElement);
+        }
+
+        grid.appendChild(yearContainer);
+      }
+
+      // Calculate total possible weeks
+      const lifespanEnd = new Date(birth);
+      lifespanEnd.setFullYear(birth.getFullYear() + lifespanYears);
+      const totalWeeks = Math.round((lifespanEnd - birth) / (1000 * 60 * 60 * 24 * 7));
+
+      // Update stats
+      const yearsLived = Math.floor(totalWeeksLived / 52.14); // Approximate
+      const yearsRemaining = lifespanYears - yearsLived;
+      const percentageLived = ((totalWeeksLived / totalWeeks) * 100).toFixed(1);
+
+      document.getElementById('weeks-lived').textContent = totalWeeksLived.toLocaleString();
+      document.getElementById('total-weeks').textContent = totalWeeks.toLocaleString();
+      document.getElementById('years-lived').textContent = yearsLived;
+      document.getElementById('years-remaining').textContent = yearsRemaining;
+      document.getElementById('percentage-lived').textContent = percentageLived + '%';
+    }
+
+    // Event listener for calendar update
+    document.getElementById('update-calendar').addEventListener('click', function() {
+      const birthdate = document.getElementById('birthdate').value;
+      const lifespan = parseInt(document.getElementById('lifespan').value);
+      generateCalendar(birthdate, lifespan);
+    });
+
+    // Accent color functionality
+    function loadAccentColor() {
+      const savedColor = localStorage.getItem('accentColor') || '#f59e0b';
+      document.documentElement.style.setProperty('--accent-color', savedColor);
+      document.getElementById('accent-color-picker').value = savedColor;
+    }
+
+    function saveAccentColor(color) {
+      localStorage.setItem('accentColor', color);
+      document.documentElement.style.setProperty('--accent-color', color);
+    }
+
+    document.getElementById('accent-color-picker').addEventListener('input', function(e) {
+      saveAccentColor(e.target.value);
+    });
+
+    // Initial setup
+    initSidebarToggle();
+    loadCurrentUser();
+    loadAccentColor();
+    setDateTime();
+    setProgress(false);
+    setDailyQuote();
+    loadGoals();
+  </script>
+</body>
+</html>
