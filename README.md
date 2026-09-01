@@ -32,6 +32,8 @@ A web application that tracks your progress through life (year, month, week) and
 
 ## Setup
 
+### Local Development
+
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
@@ -46,19 +48,74 @@ A web application that tracks your progress through life (year, month, week) and
 
 3. Open your browser to `http://localhost:5000`
 
-## Render Deployment
+## Project Structure
 
-The included `render.yaml` uses a smaller web dependency list and Gunicorn for a faster server startup. Connect the GitHub repository to Render and choose **Blueprint** deployment; Render will read this configuration automatically.
+```
+├── app.py                    # Main Flask application
+├── test_auth.py             # Authentication tests
+├── test_db.py               # Database tests
+├── run.sh                   # Script to start the app locally
+│
+├── requirements.txt         # Python dependencies (local development)
+├── requirements-web.txt     # Python dependencies (production deployment)
+│
+├── render.yaml              # Render deployment configuration
+├── railway.toml             # Railway deployment configuration
+│
+├── templates/               # Flask HTML templates (server-rendered)
+│   ├── index.html          # Main app (with login/database)
+│   ├── calendar.html       # Calendar view
+│   └── auth.html           # Login and registration pages
+│
+├── static/                  # Static assets
+│   ├── css/                # Stylesheets
+│   └── js/                 # JavaScript files
+│
+├── index.html              # Standalone version (GitHub Pages)
+├── calendar.html           # Standalone calendar (GitHub Pages)
+│
+└── docs/                   # Documentation folder
+```
 
-Render's free tier may still pause inactive services, so the first request after inactivity can take several seconds. An always-on paid instance removes that cold start.
+## Two Deployment Options
 
-## Railway Deployment
+This project supports two different ways to use it:
 
-The included `railway.toml` configures Railway to install the lightweight web dependencies and start the app with Gunicorn. Create a new Railway project, choose **Deploy from GitHub repo**, select this repository, and add a `SECRET_KEY` environment variable with a long random value.
+### 1. **Full-Featured Web App** (Flask + Database)
+- Uses `templates/` folder for server-rendered pages
+- Features user authentication, database persistence, and API
+- Deploy to: Render or Railway
+- Configuration: `render.yaml` or `railway.toml`
+- Local development: Run `python app.py`
 
-## GitHub Pages Deployment
+### 2. **Standalone Static Version** (GitHub Pages)
+- Uses root-level `index.html` and `calendar.html` 
+- No backend, no database, no authentication needed
+- Data stored only in browser localStorage
+- Deploy to: GitHub Pages (static hosting)
+- Configuration: GitHub Settings > Pages > Deploy from branch
+- No server required
 
-The root `index.html` is a standalone version of the project. It does not use Flask, login, a database, or server APIs; goals and color mode preferences are stored locally in the browser. In GitHub, open **Settings > Pages**, choose **Deploy from a branch**, select `main` and the `/ (root)` folder, then save. The site will be available at `https://darshan-cpp.github.io/life-is-short/` after GitHub finishes publishing.
+### Deploying the Flask Web App
+
+**Render Deployment**:
+1. Connect your GitHub repository to Render
+2. Choose **Blueprint** deployment (Render reads `render.yaml`)
+3. Render will auto-deploy on push
+
+**Railway Deployment**:
+1. Create a new Railway project
+2. Choose **Deploy from GitHub repo** and select this repository
+3. Add a `SECRET_KEY` environment variable with a random secure value
+4. Railway uses `railway.toml` for configuration
+
+### Deploying to GitHub Pages
+
+For the standalone static version:
+1. Go to **Settings > Pages**
+2. Choose **Deploy from a branch**
+3. Select `main` branch and `/ (root)` folder
+4. Save and GitHub will publish to `https://[your-username].github.io/life-is-short/`
 
 ## Database Schema
 
