@@ -553,6 +553,18 @@ body.dev-note-lock {
   font-size: 0.95rem;
   line-height: 1.7;
   margin-bottom: 1rem;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.dev-note-body p a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.dev-note-body p a:hover {
+  text-decoration: underline;
 }
 
 .dev-note-credits {
@@ -993,6 +1005,211 @@ main.expanded {
 .sheet-wrap {
   overflow-x: auto;
   padding: 1rem;
+}
+
+.sheet-color-palette {
+  position: fixed;
+  width: 360px;
+  max-height: min(70vh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  padding: 12px 12px 14px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(12, 18, 38, 0.18);
+  display: none;
+  z-index: 1000;
+}
+
+.sheet-color-palette.open {
+  display: block;
+}
+
+.palette-none {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 10px;
+  margin: 0 0 8px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.palette-none:hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.none-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 1rem;
+  background: #fff;
+  border: 1px solid #ddd;
+}
+
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 6px 4px;
+  justify-items: center;
+}
+
+.palette-swatch,
+.custom-color-swatch,
+.custom-color-add {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.palette-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 42px;
+  border-radius: 8px;
+  padding: 4px 2px 3px;
+  background: transparent;
+  position: relative;
+}
+
+.palette-swatch-label {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  font-size: 0.52rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.palette-swatch:hover,
+.custom-color-swatch:hover,
+.custom-color-add:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px var(--surface-color), 0 0 0 3px var(--primary-color);
+}
+
+.palette-swatch.white {
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+.palette-custom-label {
+  margin: 14px 0 8px 4px;
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.palette-custom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 4px;
+  position: relative;
+}
+
+.custom-color-add {
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 2px solid #666;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 26px;
+}
+
+.sheet-color-palette input[type="color"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sheet-header-label,
+.sheet-row-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.sheet-header-action,
+.sheet-row-delete {
+  margin-left: 0.3rem;
+}
+
+.sheet-cell-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 1.75rem;
+  background: transparent;
+}
+
+.sheet-cell-color,
+.sheet-color-btn {
+  border: none;
+  border-radius: 50%;
+  width: 1.1rem;
+  height: 1.1rem;
+  min-width: 1.1rem;
+  min-height: 1.1rem;
+  padding: 0;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  background:
+    radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 12%, rgba(255, 255, 255, 0) 42%),
+    conic-gradient(from 210deg,
+      #ffd21f 0deg,
+      #ff5f6d 60deg,
+      #d24dff 120deg,
+      #4d6bff 180deg,
+      #3fd0ff 220deg,
+      #33e6a0 270deg,
+      #c9f24d 320deg,
+      #ffd21f 360deg);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.35),
+    inset -1px -2px 3px rgba(15, 23, 42, 0.18),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+.sheet-cell-color:hover,
+.sheet-color-btn:hover {
+  transform: scale(1.15);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.4),
+    inset -1px -2px 3px rgba(15, 23, 42, 0.18),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.6),
+    0 0 0 2px var(--surface-color),
+    0 0 0 3px var(--primary-light);
 }
 
 .sheet-table {

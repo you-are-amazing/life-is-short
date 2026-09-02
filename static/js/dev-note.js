@@ -16,19 +16,55 @@
       '  <button type="button" class="dev-note-close" id="dev-note-close" aria-label="Close developer note">',
       '    <i class="fa-solid fa-xmark"></i>',
       '  </button>',
-      '  <h3 id="dev-note-title"><i class="fa-solid fa-code-branch"></i> Developer Note About the Project</h3>',
+
+      '  <h3 id="dev-note-title">',
+      '    <i class="fa-solid fa-code-branch"></i> Developer Note',
+      '  </h3>',
+
       '  <div class="dev-note-body">',
-      '    <p>Full credit for <strong>Life Is Short</strong> belongs to <strong>Twisha Patel</strong>, who created and designed this productivity and goal-tracking project from the ground up. The concept is centered around making life more meaningful by tracking your journey, setting meaningful targets, and archiving your dreams and achievements along the way.</p>',
-      '    <p>I, <strong>Darshan Parmar</strong>, have modified this instance of the project purely for my own personal use, to fit my day-to-day workflow. The idea, design, and original build remain entirely Twisha Patel&rsquo;s work.</p>',
-      '    <p>Sincere thanks to <strong>Twisha Patel</strong> for creating and sharing such a thoughtful concept, it stands entirely on her original work.</p>',
+
+      '    <p>',
+      '      <strong><a href="https://github.com/you-are-amazing/life-is-short" target="_blank" rel="noopener noreferrer">Life Is Short</a></strong> was originally created and designed by ',
+      '      <strong>Twisha Patel</strong> as a personal productivity and goal-tracking project. ',
+      '      The original concept, design, and implementation were developed by her, ',
+      '      with the idea of making life more meaningful by tracking your journey, ',
+      '      setting meaningful goals, and preserving your dreams and achievements along the way.',
+      '    </p>',
+
+      '    <p>',
+      '      I, <strong>Darshan Parmar</strong>, have modified and customized this version ',
+      '      for my personal use to better suit my day-to-day workflow. ',
+      '      These modifications are my own, while the original concept, design, ',
+      '      and foundation of the project remain credited to <strong>Twisha Patel</strong>.',
+      '    </p>',
+
+      '    <p>',
+      '      I sincerely thank <strong>Twisha Patel</strong> for creating ',
+      '      such a thoughtful and meaningful project. I have built upon her original ',
+      '      work for my own personal use and greatly appreciate the concept behind it.',
+      '    </p>',
+
       '    <div class="dev-note-credits">',
-      '      <a href="https://github.com/twi-exe" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> Originally reated by Twisha Patel </a>',
+      '      <a href="https://github.com/twi-exe" target="_blank" rel="noopener noreferrer">',
+      '        <i class="fa-brands fa-github"></i> Original Project — Twisha Patel',
+      '      </a>',
       '    </div>',
-      '    <p class="dev-note-quote">Life is short. Make it meaningful, track your journey, work toward your dreams, and preserve the progress you make along the way.</p>',
+
+      '    <p class="dev-note-quote">',
+      '      Life is short. Make it meaningful. Track your journey, work toward your dreams, ',
+      '      and preserve the progress you make along the way.',
+      '    </p>',
+
       '    <div class="dev-note-signature" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.1); font-size: 0.9rem; color: #666;">',
-      '      <p style="margin: 0 0 0.5rem 0;"><strong>Regards</strong></p>',
-      '      <p style="margin: 0;"><strong>Darshan Parmar</strong> <a href="https://github.com/you-are-amazing" target="_blank" rel="noopener noreferrer" style="color: #0366d6; text-decoration: none;"><i class="fa-brands fa-github"></i> GitHub</a></p>',
+      '      <p style="margin: 0 0 0.5rem 0;"><strong>Regards,</strong></p>',
+      '      <p style="margin: 0;">',
+      '        <strong>Darshan Parmar</strong> ',
+      '        <a href="https://github.com/you-are-amazing" target="_blank" rel="noopener noreferrer" style="color: #0366d6; text-decoration: none;">',
+      '          <i class="fa-brands fa-github"></i> GitHub',
+      '        </a>',
+      '      </p>',
       '    </div>',
+
       '  </div>',
       '</div>'
     ].join('');
@@ -43,31 +79,67 @@
     if (closeBtn) closeBtn.addEventListener('click', closeDevNote);
 
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && overlay.classList.contains('open')) closeDevNote();
+      if (event.key === 'Escape' && overlay.classList.contains('open')) {
+        closeDevNote();
+      }
     });
   }
 
   function openDevNote(event) {
     if (event) event.preventDefault();
+
     buildModal();
+
     const overlay = document.getElementById('dev-note-overlay');
+
     overlay.classList.add('open');
     document.body.classList.add('dev-note-lock');
   }
 
   function closeDevNote() {
     const overlay = document.getElementById('dev-note-overlay');
+
     if (overlay) overlay.classList.remove('open');
+
     document.body.classList.remove('dev-note-lock');
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    // Any element can opt into opening the developer note - the sidebar
-    // button (by id, for backward compatibility) plus any element marked
-    // with data-dev-note-trigger (e.g. the corner credit badge).
+  window.openDeveloperNoteModal = function (event) {
+    if (event && typeof event.preventDefault === 'function') {
+      event.preventDefault();
+    }
+    openDevNote(event || null);
+  };
+
+  function bindDevNoteTriggers() {
     const triggers = document.querySelectorAll('[data-dev-note-trigger]');
+
     triggers.forEach(function (trigger) {
-      trigger.addEventListener('click', openDevNote);
+      if (trigger.dataset.devNoteBound === 'true') return;
+      trigger.dataset.devNoteBound = 'true';
+
+      trigger.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        openDevNote(event);
+      });
     });
+  }
+
+  document.addEventListener('click', function (event) {
+    const trigger = event.target && event.target.closest ? event.target.closest('[data-dev-note-trigger]') : null;
+    if (!trigger) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    openDevNote(event);
   });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    bindDevNoteTriggers();
+  });
+
+  if (document.readyState !== 'loading') {
+    bindDevNoteTriggers();
+  }
 })();

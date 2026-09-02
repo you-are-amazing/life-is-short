@@ -96,7 +96,7 @@
     <header class="site-header">
       <span>Life is Short</span>
       <div class="header-actions">
-        <a class="credit-link" href="https://github.com/twi-exe" target="_blank" rel="noopener noreferrer" data-dev-note-trigger title="Developer Note">
+        <a class="credit-link" href="#" data-dev-note-trigger title="Developer Note" aria-label="Open developer note" role="button" onclick="window.openDeveloperNoteModal && window.openDeveloperNoteModal(event); return false;">
           <i class="fa-brands fa-github"></i> Developer Note
         </a>
       </div>
@@ -176,6 +176,18 @@
       </div>
       <div class="sheet-wrap">
         <table class="sheet-table" id="life-sheet"></table>
+      </div>
+      <div class="sheet-color-palette" id="sheet-color-palette" role="dialog" aria-label="Sheet color palette">
+        <button type="button" class="palette-none" data-color-value="transparent">
+          <span class="none-icon">×</span>
+          <span>None</span>
+        </button>
+        <div class="palette-grid" id="sheet-palette-grid"></div>
+        <div class="palette-custom-label">CUSTOM</div>
+        <div class="palette-custom">
+          <button type="button" class="custom-color-add" data-sheet-custom-color-add aria-label="Choose custom color">+</button>
+          <input type="color" value="#ff0000" data-sheet-color-picker aria-label="Custom color picker">
+        </div>
       </div>
       <div class="sheet-footer">
         <button class="small-btn danger" id="delete-sheet-btn" type="button">Delete</button>
@@ -451,9 +463,99 @@
     const SHEET_STORAGE_KEY = 'life_sheet_data_v2';
     const SHEET_ACTIVE_KEY = 'life_sheet_active_index';
 
+    const SHEET_PALETTE_COLORS = [
+      { value: '#000000', label: 'Black' },
+      { value: '#434343', label: 'Gray 1' },
+      { value: '#666666', label: 'Gray 2' },
+      { value: '#999999', label: 'Gray 3' },
+      { value: '#b7b7b7', label: 'Gray 4' },
+      { value: '#cccccc', label: 'Gray 5' },
+      { value: '#d9d9d9', label: 'Gray 6' },
+      { value: '#efefef', label: 'Gray 7' },
+      { value: '#f3f3f3', label: 'Gray 8' },
+      { value: '#ffffff', label: 'White' },
+      { value: '#980000', label: 'Red 1' },
+      { value: '#ff0000', label: 'Red 2' },
+      { value: '#ff9900', label: 'Orange' },
+      { value: '#ffff00', label: 'Yellow' },
+      { value: '#00ff00', label: 'Green 1' },
+      { value: '#00ffff', label: 'Cyan' },
+      { value: '#4a86e8', label: 'Blue 1' },
+      { value: '#0000ff', label: 'Blue 2' },
+      { value: '#9900ff', label: 'Purple' },
+      { value: '#ff00ff', label: 'Pink' },
+      { value: '#e6b8af', label: 'Rose' },
+      { value: '#f4cccc', label: 'Blush' },
+      { value: '#fce5cd', label: 'Peach' },
+      { value: '#fff2cc', label: 'Sand' },
+      { value: '#d9ead3', label: 'Mint' },
+      { value: '#d0e0e3', label: 'Mist' },
+      { value: '#c9daf8', label: 'Sky' },
+      { value: '#cfe2f3', label: 'Ice' },
+      { value: '#d9d2e9', label: 'Lavender' },
+      { value: '#ead1dc', label: 'Lilac' },
+      { value: '#dd7e6b', label: 'Coral' },
+      { value: '#ea9999', label: 'Warm Red' },
+      { value: '#f9cb9c', label: 'Apricot' },
+      { value: '#ffe599', label: 'Sun' },
+      { value: '#b6d7a8', label: 'Leaf' },
+      { value: '#a2c4c9', label: 'Sea' },
+      { value: '#a4c2f4', label: 'Azure' },
+      { value: '#9fc5e8', label: 'Cool Blue' },
+      { value: '#b4a7d6', label: 'Violet' },
+      { value: '#d5a6bd', label: 'Berry' },
+      { value: '#cc4125', label: 'Brick' },
+      { value: '#e06666', label: 'Tomato' },
+      { value: '#f6b26b', label: 'Amber' },
+      { value: '#ffd966', label: 'Gold' },
+      { value: '#93c47d', label: 'Olive' },
+      { value: '#76a5af', label: 'Teal' },
+      { value: '#6d9eeb', label: 'Royal' },
+      { value: '#6fa8dc', label: 'Aqua' },
+      { value: '#8e7cc3', label: 'Grape' },
+      { value: '#c27ba0', label: 'Plum' },
+      { value: '#a61c00', label: 'Crimson' },
+      { value: '#cc0000', label: 'Deep Red' },
+      { value: '#e69138', label: 'Burnt' },
+      { value: '#f1c232', label: 'Mustard' },
+      { value: '#6aa84f', label: 'Forest' },
+      { value: '#45818e', label: 'Deep Teal' },
+      { value: '#3c78d8', label: 'Indigo' },
+      { value: '#3d85c6', label: 'Ocean' },
+      { value: '#674ea7', label: 'Deep Purple' },
+      { value: '#a64d79', label: 'Magenta' },
+      { value: '#85200c', label: 'Maroon' },
+      { value: '#990000', label: 'Dark Red' },
+      { value: '#b45f06', label: 'Cinnamon' },
+      { value: '#bf9000', label: 'Gold Dark' },
+      { value: '#38761d', label: 'Deep Green' },
+      { value: '#134f5c', label: 'Navy Teal' },
+      { value: '#1155cc', label: 'Blue Stripe' },
+      { value: '#0b5394', label: 'Deep Blue' },
+      { value: '#351c75', label: 'Royal Purple' },
+      { value: '#741b47', label: 'Dark Rose' },
+      { value: '#5b0f00', label: 'Sienna' },
+      { value: '#660000', label: 'Mahogany' },
+      { value: '#783f04', label: 'Chestnut' },
+      { value: '#7f6000', label: 'Umber' },
+      { value: '#274e13', label: 'Green Dark' },
+      { value: '#0b3d45', label: 'Slate Teal' },
+      { value: '#1c4587', label: 'Steel Blue' },
+      { value: '#073763', label: 'Midnight' },
+      { value: '#20124d', label: 'Dark Violet' },
+      { value: '#4c1130', label: 'Plum Dark' }
+    ];
+
     function createSheet(name, rows = 5, cols = 3) {
       const data = Array.from({ length: rows }, () => Array.from({ length: cols }, () => ''));
-      return { name, data };
+      return {
+        name,
+        data,
+        rowColors: Array.from({ length: rows }, () => ''),
+        colColors: Array.from({ length: cols }, () => ''),
+        cellColors: Array.from({ length: rows }, () => Array.from({ length: cols }, () => '')),
+        colorLabels: {}
+      };
     }
 
     function getDefaultSheets() {
@@ -475,14 +577,44 @@
       });
     }
 
+    function normalizeSheetColorArray(values, length, fallback = '') {
+      if (!Array.isArray(values)) return Array.from({ length }, () => fallback);
+      const normalized = values.slice(0, length).map((value) => typeof value === 'string' ? value : fallback);
+      while (normalized.length < length) normalized.push(fallback);
+      return normalized;
+    }
+
+    function normalizeSheetColors(sheet, index) {
+      const rows = Math.max(normalizeSheetData(sheet && sheet.data).length, 1);
+      const cols = Math.max(normalizeSheetData(sheet && sheet.data)[0]?.length || 0, 3);
+      const colorLabels = {};
+      if (sheet && typeof sheet.colorLabels === 'object') {
+        Object.entries(sheet.colorLabels).forEach(([key, value]) => {
+          if (typeof value === 'string' && value.trim()) {
+            colorLabels[key] = value.trim();
+          }
+        });
+      }
+      const normalizedSheet = {
+        name: typeof sheet?.name === 'string' && sheet.name.trim() ? sheet.name.trim() : `Sheet ${index + 1}`,
+        data: normalizeSheetData(sheet && sheet.data),
+        rowColors: normalizeSheetColorArray(sheet && sheet.rowColors, rows),
+        colColors: normalizeSheetColorArray(sheet && sheet.colColors, cols),
+        cellColors: Array.from({ length: rows }, (_, rowIndex) => {
+          const rowArray = Array.isArray(sheet && sheet.cellColors && sheet.cellColors[rowIndex]) ? sheet.cellColors[rowIndex] : [];
+          return normalizeSheetColorArray(rowArray, cols);
+        }),
+        colorLabels
+      };
+      while (normalizedSheet.cellColors.length < rows) normalizedSheet.cellColors.push(Array.from({ length: cols }, () => ''));
+      return normalizedSheet;
+    }
+
     function loadSheets() {
       try {
         const saved = JSON.parse(localStorage.getItem(SHEET_STORAGE_KEY) || 'null');
         if (Array.isArray(saved) && saved.length) {
-          return saved.map((sheet, index) => ({
-            name: typeof sheet.name === 'string' && sheet.name.trim() ? sheet.name.trim() : `Sheet ${index + 1}`,
-            data: normalizeSheetData(sheet.data)
-          }));
+          return saved.map((sheet, index) => normalizeSheetColors(sheet, index));
         }
       } catch (error) {
         console.warn('Unable to load life sheets', error);
@@ -578,6 +710,177 @@
       renderSheet();
     }
 
+    function hexToRgb(hex) {
+      const normalized = hex.replace('#', '');
+      const full = normalized.length === 3 ? normalized.split('').map((char) => char + char).join('') : normalized;
+      const safe = full.length === 6 ? full : 'ffffff';
+      const int = Number.parseInt(safe, 16);
+      return {
+        r: (int >> 16) & 255,
+        g: (int >> 8) & 255,
+        b: int & 255
+      };
+    }
+
+    function getReadableTextColor(backgroundColor) {
+      if (!backgroundColor || backgroundColor === 'transparent') return '#111827';
+      const { r, g, b } = hexToRgb(backgroundColor);
+      const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+      return luminance > 0.64 ? '#111827' : '#ffffff';
+    }
+
+    // Explicit color precedence for overlapping styles:
+    // cell color > row color > column color > no color.
+    // This merge is applied consistently in renderSheet() and in getSheetEffectiveCellColor().
+    function getSheetEffectiveCellColor(sheet, rowIndex, colIndex) {
+      if (!sheet) return '';
+      const cellColor = sheet.cellColors?.[rowIndex]?.[colIndex];
+      if (cellColor) return cellColor;
+      const rowColor = sheet.rowColors?.[rowIndex];
+      if (rowColor) return rowColor;
+      return sheet.colColors?.[colIndex] || '';
+    }
+
+    function getSheetResolvedStyle(sheet, rowIndex, colIndex) {
+      const backgroundColor = getSheetEffectiveCellColor(sheet, rowIndex, colIndex);
+      return {
+        backgroundColor: backgroundColor || '',
+        color: backgroundColor ? getReadableTextColor(backgroundColor) : '#111827'
+      };
+    }
+
+    function setSheetTargetColor(targetType, rowIndex, colIndex, colorValue, colorLabel) {
+      const sheets = loadSheets();
+      const activeIndex = getActiveSheetIndex();
+      const sheet = sheets[activeIndex] || sheets[0];
+      if (!sheet) return;
+
+      if (!sheet.colorLabels || typeof sheet.colorLabels !== 'object') {
+        sheet.colorLabels = {};
+      }
+
+      if (targetType === 'row') {
+        if (!Array.isArray(sheet.rowColors)) sheet.rowColors = [];
+        sheet.rowColors[rowIndex] = colorValue === 'transparent' ? '' : colorValue;
+      }
+
+      if (targetType === 'col') {
+        if (!Array.isArray(sheet.colColors)) sheet.colColors = [];
+        sheet.colColors[colIndex] = colorValue === 'transparent' ? '' : colorValue;
+      }
+
+      if (targetType === 'cell') {
+        if (!Array.isArray(sheet.cellColors)) sheet.cellColors = [];
+        if (!Array.isArray(sheet.cellColors[rowIndex])) sheet.cellColors[rowIndex] = [];
+        sheet.cellColors[rowIndex][colIndex] = colorValue === 'transparent' ? '' : colorValue;
+      }
+
+      if (colorValue && colorValue !== 'transparent') {
+        const label = typeof colorLabel === 'string' && colorLabel.trim() ? colorLabel.trim() : (SHEET_PALETTE_COLORS.find((entry) => entry.value === colorValue)?.label || 'Custom');
+        sheet.colorLabels[colorValue] = label;
+      }
+
+      saveSheets(sheets);
+      renderSheet();
+    }
+
+    function buildSheetColorPalette() {
+      const paletteGrid = document.getElementById('sheet-palette-grid');
+      if (!paletteGrid) return;
+
+      paletteGrid.innerHTML = '';
+      SHEET_PALETTE_COLORS.forEach(({ value, label }) => {
+        const swatch = document.createElement('button');
+        swatch.type = 'button';
+        swatch.className = 'palette-swatch' + (value === '#ffffff' ? ' white' : '');
+        swatch.style.backgroundColor = value;
+        swatch.dataset.colorValue = value;
+        swatch.dataset.colorLabel = label;
+        swatch.title = `${label} (${value})`;
+        swatch.setAttribute('aria-label', `Cell color ${label}`);
+
+        const colorLabel = document.createElement('span');
+        colorLabel.className = 'palette-swatch-label';
+        colorLabel.textContent = label;
+
+        swatch.appendChild(colorLabel);
+        paletteGrid.appendChild(swatch);
+      });
+    }
+
+    function closeSheetColorPalette() {
+      const palette = document.getElementById('sheet-color-palette');
+      if (palette) palette.classList.remove('open');
+    }
+
+    let activeSheetColorTarget = { type: null, rowIndex: null, colIndex: null };
+
+    function openSheetColorPalette(target) {
+      const palette = document.getElementById('sheet-color-palette');
+      if (!palette || !target) return;
+
+      activeSheetColorTarget = {
+        type: target.dataset.sheetColorTarget || 'cell',
+        rowIndex: Number(target.dataset.sheetRowIndex ?? -1),
+        colIndex: Number(target.dataset.sheetColIndex ?? -1)
+      };
+
+      const rect = target.getBoundingClientRect();
+      const margin = 16;
+
+      // Make the palette visible-but-invisible first so we can measure its
+      // REAL rendered size. Measuring while it's still display:none (the old
+      // code did this) always returns 0, so it fell back to a guessed
+      // 360x250 box — if the real palette was taller than that guess, the
+      // position math was wrong and the palette got placed partly off the
+      // bottom/edge of the page, making it look cut in half.
+      palette.style.visibility = 'hidden';
+      palette.classList.add('open');
+
+      const paletteWidth = palette.offsetWidth || 360;
+      const paletteHeight = palette.offsetHeight || 250;
+
+      let nextTop = rect.bottom + 12;
+      let nextLeft = rect.left - 6;
+
+      if (nextTop + paletteHeight > window.innerHeight - margin) {
+        nextTop = rect.top - paletteHeight - 12;
+      }
+
+      if (nextLeft + paletteWidth > window.innerWidth - margin) {
+        nextLeft = Math.max(margin, window.innerWidth - paletteWidth - margin);
+      }
+
+      nextTop = Math.max(margin, Math.min(nextTop, window.innerHeight - paletteHeight - margin));
+      nextLeft = Math.max(margin, Math.min(nextLeft, window.innerWidth - paletteWidth - margin));
+
+      palette.style.top = `${nextTop}px`;
+      palette.style.left = `${nextLeft}px`;
+      palette.style.visibility = '';
+
+      const paletteRect = palette.getBoundingClientRect();
+      if (paletteRect.bottom > window.innerHeight - margin || paletteRect.top < margin) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function applySheetColor(colorValue, colorLabel) {
+      if (!activeSheetColorTarget.type) return;
+
+      const { type, rowIndex, colIndex } = activeSheetColorTarget;
+      const effectiveLabel = typeof colorLabel === 'string' && colorLabel.trim() ? colorLabel.trim() : (SHEET_PALETTE_COLORS.find((entry) => entry.value === colorValue)?.label || 'Custom');
+
+      if (type === 'row' && rowIndex >= 0) {
+        setSheetTargetColor('row', rowIndex, 0, colorValue, effectiveLabel);
+      } else if (type === 'col' && colIndex >= 0) {
+        setSheetTargetColor('col', 0, colIndex, colorValue, effectiveLabel);
+      } else if (type === 'cell' && rowIndex >= 0 && colIndex >= 0) {
+        setSheetTargetColor('cell', rowIndex, colIndex, colorValue, effectiveLabel);
+      }
+
+      closeSheetColorPalette();
+    }
+
     function renderSheet() {
       const table = document.getElementById('life-sheet');
       if (!table) return;
@@ -605,7 +908,19 @@
         const th = document.createElement('th');
         th.setAttribute('scope', 'col');
         th.dataset.colIndex = String(index);
-        th.innerHTML = `<span>${label}</span> <button class="sheet-header-action" type="button" data-remove-col="${index}" title="Delete column">×</button>`;
+        const columnBackground = sheet.colColors?.[index] || '';
+        const columnStyle = columnBackground ? {
+          backgroundColor: columnBackground,
+          color: getReadableTextColor(columnBackground)
+        } : {};
+        Object.assign(th.style, columnStyle);
+        th.innerHTML = `
+          <div class="sheet-header-label">
+            <button class="sheet-color-btn" type="button" data-sheet-color-target="col" data-sheet-col-index="${index}" title="Colour column" aria-label="Colour column"></button>
+            <span>${label}</span>
+            <button class="sheet-header-action" type="button" data-remove-col="${index}" title="Delete column">×</button>
+          </div>
+        `;
         headerRow.appendChild(th);
       });
 
@@ -617,18 +932,59 @@
         const tr = document.createElement('tr');
         const rowLabel = document.createElement('th');
         rowLabel.setAttribute('scope', 'row');
-        rowLabel.innerHTML = `<span>${rowIndex + 1}</span> <button class="sheet-row-delete" type="button" data-remove-row="${rowIndex}" title="Delete row">×</button>`;
+        const rowBackground = sheet.rowColors?.[rowIndex] || '';
+        const rowStyle = rowBackground ? {
+          backgroundColor: rowBackground,
+          color: getReadableTextColor(rowBackground)
+        } : {};
+        Object.assign(rowLabel.style, rowStyle);
+        rowLabel.innerHTML = `
+          <div class="sheet-row-label">
+            <span>${rowIndex + 1}</span>
+            <button class="sheet-color-btn" type="button" data-sheet-color-target="row" data-sheet-row-index="${rowIndex}" title="Colour row" aria-label="Colour row"></button>
+            <button class="sheet-row-delete" type="button" data-remove-row="${rowIndex}" title="Delete row">×</button>
+          </div>
+        `;
         tr.appendChild(rowLabel);
 
         row.forEach((cellValue, colIndex) => {
           const td = document.createElement('td');
+          const resolvedStyle = getSheetResolvedStyle(sheet, rowIndex, colIndex);
+          if (resolvedStyle.backgroundColor) {
+            td.style.backgroundColor = resolvedStyle.backgroundColor;
+            td.style.color = resolvedStyle.color;
+          }
+
+          const cellWrapper = document.createElement('div');
+          cellWrapper.className = 'sheet-cell-wrap';
+          if (resolvedStyle.backgroundColor) {
+            cellWrapper.style.backgroundColor = resolvedStyle.backgroundColor;
+            cellWrapper.style.color = resolvedStyle.color;
+          }
+
+          const colorButton = document.createElement('button');
+          colorButton.type = 'button';
+          colorButton.className = 'sheet-cell-color';
+          colorButton.dataset.sheetColorTarget = 'cell';
+          colorButton.dataset.sheetRowIndex = String(rowIndex);
+          colorButton.dataset.sheetColIndex = String(colIndex);
+          colorButton.title = 'Colour cell';
+          colorButton.setAttribute('aria-label', `Colour cell ${rowIndex + 1}, ${String.fromCharCode(65 + colIndex)}`);
+
           const cell = document.createElement('div');
           cell.className = 'sheet-cell';
           cell.contentEditable = 'true';
           cell.dataset.rowIndex = String(rowIndex);
           cell.dataset.colIndex = String(colIndex);
           cell.textContent = cellValue || '';
-          td.appendChild(cell);
+          if (resolvedStyle.backgroundColor) {
+            cell.style.color = resolvedStyle.color;
+            cell.style.backgroundColor = resolvedStyle.backgroundColor;
+          }
+
+          cellWrapper.appendChild(colorButton);
+          cellWrapper.appendChild(cell);
+          td.appendChild(cellWrapper);
           tr.appendChild(td);
         });
 
@@ -637,16 +993,31 @@
 
       table.appendChild(tbody);
 
+      document.querySelectorAll('[data-sheet-color-target]').forEach((button) => {
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          openSheetColorPalette(event.currentTarget);
+        });
+      });
+
       document.querySelectorAll('[data-remove-row]').forEach((button) => {
         button.addEventListener('click', (event) => {
+          event.stopPropagation();
           const rowIndex = Number(event.currentTarget.dataset.removeRow);
+          if (!window.confirm(`Delete row ${rowIndex + 1}?`)) {
+            return;
+          }
           deleteSheetRow(rowIndex);
         });
       });
 
       document.querySelectorAll('[data-remove-col]').forEach((button) => {
         button.addEventListener('click', (event) => {
+          event.stopPropagation();
           const colIndex = Number(event.currentTarget.dataset.removeCol);
+          if (!window.confirm(`Delete column ${String.fromCharCode(65 + colIndex)}?`)) {
+            return;
+          }
           deleteSheetColumn(colIndex);
         });
       });
@@ -669,6 +1040,8 @@
       if (!sheet) return;
       const columnCount = Math.max(...sheet.data.map(row => row.length), 1);
       sheet.data.push(Array(columnCount).fill(''));
+      sheet.rowColors.push('');
+      sheet.cellColors.push(Array(columnCount).fill(''));
       saveSheets(sheets);
       renderSheet();
     }
@@ -679,6 +1052,8 @@
       const sheet = sheets[activeIndex] || sheets[0];
       if (!sheet || sheet.data.length <= 1) return;
       sheet.data.splice(rowIndex, 1);
+      if (Array.isArray(sheet.rowColors)) sheet.rowColors.splice(rowIndex, 1);
+      if (Array.isArray(sheet.cellColors)) sheet.cellColors.splice(rowIndex, 1);
       saveSheets(sheets);
       renderSheet();
     }
@@ -689,6 +1064,8 @@
       const sheet = sheets[activeIndex] || sheets[0];
       if (!sheet) return;
       sheet.data.forEach(row => row.push(''));
+      sheet.colColors.push('');
+      sheet.cellColors = sheet.cellColors.map((rowColors) => [...rowColors, '']);
       saveSheets(sheets);
       renderSheet();
     }
@@ -699,6 +1076,10 @@
       const sheet = sheets[activeIndex] || sheets[0];
       if (!sheet || sheet.data[0].length <= 1) return;
       sheet.data = sheet.data.map(row => row.filter((_, index) => index !== colIndex));
+      if (Array.isArray(sheet.colColors)) sheet.colColors.splice(colIndex, 1);
+      if (Array.isArray(sheet.cellColors)) {
+        sheet.cellColors = sheet.cellColors.map((rowColors) => rowColors.filter((_, index) => index !== colIndex));
+      }
       saveSheets(sheets);
       renderSheet();
     }
@@ -710,6 +1091,36 @@
       const colIndex = Number(target.dataset.colIndex);
       if (Number.isInteger(rowIndex) && Number.isInteger(colIndex)) {
         updateSheetCell(rowIndex, colIndex, target.textContent || '');
+      }
+    });
+
+    buildSheetColorPalette();
+
+    document.getElementById('sheet-color-palette').addEventListener('click', (event) => {
+      const swatch = event.target.closest('[data-color-value]');
+      if (swatch) {
+        applySheetColor(swatch.dataset.colorValue, swatch.dataset.colorLabel || 'Custom');
+      }
+    });
+
+    document.getElementById('sheet-color-palette').querySelector('[data-sheet-custom-color-add]').addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const picker = document.querySelector('[data-sheet-color-picker]');
+      if (picker) picker.click();
+    });
+
+    document.querySelector('[data-sheet-color-picker]').addEventListener('input', (event) => {
+      const colorValue = event.target.value;
+      const label = window.prompt('Name this color (optional)', 'Custom');
+      applySheetColor(colorValue, label && label.trim() ? label.trim() : 'Custom');
+    });
+
+    document.addEventListener('click', (event) => {
+      const palette = document.getElementById('sheet-color-palette');
+      if (!palette) return;
+      if (!palette.contains(event.target) && !event.target.closest('[data-sheet-color-target]')) {
+        closeSheetColorPalette();
       }
     });
 
