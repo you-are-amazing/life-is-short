@@ -153,14 +153,51 @@
       transition: opacity 180ms ease, color 180ms ease, border-color 180ms ease;
     }
 
+    .note-card-actions {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: inline-flex;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 180ms ease;
+    }
+
     .note-card:hover .edit-note-title-btn,
     .note-card:focus-within .edit-note-title-btn {
+      opacity: 1;
+    }
+
+    .note-card:hover .note-card-actions,
+    .note-card:focus-within .note-card-actions {
+      opacity: 1;
+    }
+
+    .note-card-actions .edit-note-title-btn {
+      position: static;
       opacity: 1;
     }
 
     .edit-note-title-btn:hover {
       color: var(--text-color);
       border-color: var(--primary-color);
+    }
+
+    .delete-note-gallery-btn {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      color: var(--text-muted);
+      background: var(--surface-hover);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: color 180ms ease, border-color 180ms ease;
+    }
+
+    .delete-note-gallery-btn:hover {
+      color: var(--danger-color);
+      border-color: var(--danger-color);
     }
 
     .note-card {
@@ -1248,7 +1285,22 @@
           event.stopPropagation();
           openNoteTitleDialog(note);
         });
-        card.appendChild(editButton);
+        const cardActions = document.createElement('div');
+        cardActions.className = 'note-card-actions';
+        cardActions.appendChild(editButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'delete-note-gallery-btn';
+        deleteButton.title = 'Delete note';
+        deleteButton.setAttribute('aria-label', `Delete ${note.title || 'Untitled Note'}`);
+        deleteButton.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i>';
+        deleteButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          deleteNote(note.id);
+        });
+        cardActions.appendChild(deleteButton);
+        card.appendChild(cardActions);
         card.addEventListener('click', () => setActiveNote(note.id));
         card.addEventListener('keydown', (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -2460,6 +2512,7 @@
         }
         renderNotesList();
         renderEditor();
+        renderNotesGallery();
       }
     }
 
