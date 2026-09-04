@@ -17,6 +17,13 @@ Link : https://you-are-amazing.github.io/life-is-short/
 - **RESTful API**: Backend API for goal and user management
 - **Responsive Design**: Works on desktop and mobile devices
 - **Color Modes**: Switch between light and dark mode, with your preference saved in the browser
+- **Standalone Notepad**: Create and organize notes with a rich text editor
+- **Text Highlighting**: Apply preset background colors, reuse the last selected color, and remove highlights
+- **Gallery Note Management**: Edit note titles or delete notes directly from the notes gallery
+
+## Project Modifications
+
+The notepad features in this project were modified to improve the writing experience. These modifications include the inline text highlighter with persistent formatting, mixed-selection highlight removal, editor minimize/maximize controls, and note title editing and deletion from the gallery.
 
 ## Authentication System
 
@@ -75,6 +82,8 @@ Link : https://you-are-amazing.github.io/life-is-short/
 │
 ├── index.html              # Standalone version (GitHub Pages)
 ├── calendar.html           # Standalone calendar (GitHub Pages)
+├── notepad/                # Standalone notes tracker and rich text editor
+│   └── index.html
 │
 └── docs/                   # Documentation folder
 ```
