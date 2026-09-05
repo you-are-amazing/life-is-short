@@ -29,7 +29,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
-  <script src="../static/js/auth.js" defer></script>
+  <script src="../static/js/auth.js?v=2" defer></script>
   <style>
     .notepad-container {
       display: flex;
@@ -1047,6 +1047,10 @@
         <button type="button" class="auth-button auth-button-quiet" data-auth-choice="guest">Continue as Guest</button>
       </div>
       <form class="auth-form" id="auth-form" hidden novalidate>
+        <div class="auth-name-field" id="auth-name-field" hidden>
+          <label for="auth-name">Name</label>
+          <input id="auth-name" name="name" type="text" autocomplete="name" placeholder="What should we call you?">
+        </div>
         <label for="auth-email">Email</label>
         <input id="auth-email" name="email" type="email" autocomplete="email" required>
         <label for="auth-password">Password</label>

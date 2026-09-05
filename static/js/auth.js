@@ -207,9 +207,9 @@ function setupPasswordForm() {
 }
 
 function hideAllAuthSteps() {
-  document.getElementById('auth-choice-buttons').hidden = true;
-  document.getElementById('auth-form').hidden = true;
-  document.getElementById('auth-guest-confirm').hidden = true;
+  document.getElementById('auth-choice-buttons')?.setAttribute('hidden', '');
+  document.getElementById('auth-form')?.setAttribute('hidden', '');
+  document.getElementById('auth-guest-confirm')?.setAttribute('hidden', '');
 }
 
 function showAuthForm(mode) {
@@ -222,21 +222,32 @@ function showAuthForm(mode) {
   if (!form) return;
   hideAllAuthSteps();
   form.hidden = false;
-  submit.textContent = mode === 'signup' ? 'Create account' : 'Sign In';
+  if (submit) submit.textContent = mode === 'signup' ? 'Create account' : 'Sign In';
   form.dataset.mode = mode;
   if (nameField) nameField.hidden = mode !== 'signup';
   if (nameInput) nameInput.required = mode === 'signup';
   description.textContent = mode === 'signup'
     ? 'Create an account to keep your progress across devices.'
     : 'Welcome back. Your progress is waiting.';
-  toggle.innerHTML = mode === 'signup'
-    ? 'Already have an account? <span>Sign in</span>'
-    : "Don't have an account? <span>Sign up</span>";
+  if (toggle) {
+    toggle.innerHTML = mode === 'signup'
+      ? 'Already have an account? <span>Sign in</span>'
+      : "Don't have an account? <span>Sign up</span>";
+  }
   setAuthError(firebaseConfigIsReady() ? '' : 'Add your Firebase web config in static/js/auth.js before using accounts.');
   (mode === 'signup' ? nameInput : document.getElementById('auth-email'))?.focus();
 }
 
 function showGuestConfirm() {
+  if (!document.getElementById('auth-guest-confirm')) {
+    const name = window.prompt('What should we call you? (Optional)')?.trim() || '';
+    if (name) localStorage.setItem(LIFE_IS_SHORT_NAME_KEY, name);
+    localStorage.setItem(LIFE_IS_SHORT_MODE_KEY, 'guest');
+    setAccountActions(null, 'guest');
+    updateSiteGreeting();
+    setAuthOverlayVisible(false);
+    return;
+  }
   hideAllAuthSteps();
   document.getElementById('auth-guest-confirm').hidden = false;
   document.getElementById('auth-description').textContent = 'One more thing before you continue as a guest.';
@@ -244,7 +255,7 @@ function showGuestConfirm() {
 
 function showAuthChoices() {
   hideAllAuthSteps();
-  document.getElementById('auth-choice-buttons').hidden = false;
+  document.getElementById('auth-choice-buttons')?.removeAttribute('hidden');
   document.getElementById('auth-description').textContent = 'Sign in to keep your progress with you, or continue locally as a guest.';
   setAuthError('');
 }
