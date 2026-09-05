@@ -22,8 +22,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="../static/js/dev-note.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+  <script src="../static/js/auth.js" defer></script>
 </head>
-<body>
+<body class="auth-lock">
   <div class="sidebar">
     <div class="sidebar-header"><button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></div>
     <div class="sidebar-content">
@@ -39,9 +43,12 @@
   <main>
     <header class="site-header">
       <span>Life Calendar</span>
-      <a class="credit-link" href="https://github.com/twi-exe" target="_blank" rel="noopener noreferrer" title="Original concept and project by Twisha Patel">
-        <i class="fa-brands fa-github"></i> Created by Twisha Patel
-      </a>
+      <div class="header-actions">
+        <div id="auth-account-actions" class="auth-account-actions" hidden></div>
+        <a class="credit-link" href="https://github.com/twi-exe" target="_blank" rel="noopener noreferrer" title="Original concept and project by Twisha Patel">
+          <i class="fa-brands fa-github"></i> Created by Twisha Patel
+        </a>
+      </div>
     </header>
     <section class="calendar-container">
       <h1>Life Calendar</h1>
@@ -65,6 +72,30 @@
       </div>
     </section>
   </main>
+  <div class="auth-overlay" id="auth-overlay">
+    <section class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div class="auth-modal-heading">
+        <span class="auth-kicker">Life is Short</span>
+        <h1 id="auth-title">Make this time yours.</h1>
+        <p id="auth-description">Sign in to keep your progress with you, or continue locally as a guest.</p>
+      </div>
+      <div class="auth-choice-buttons" id="auth-choice-buttons">
+        <button type="button" class="auth-button auth-button-primary" data-auth-choice="signin">Sign In</button>
+        <button type="button" class="auth-button" data-auth-choice="signup">Sign Up</button>
+        <button type="button" class="auth-button auth-button-quiet" data-auth-choice="guest">Continue as Guest</button>
+      </div>
+      <form class="auth-form" id="auth-form" hidden novalidate>
+        <label for="auth-email">Email</label>
+        <input id="auth-email" name="email" type="email" autocomplete="email" required>
+        <label for="auth-password">Password</label>
+        <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="6" required>
+        <p class="auth-error" id="auth-error" role="alert"></p>
+        <button type="submit" class="auth-button auth-button-primary" id="auth-submit">Sign In</button>
+        <button type="button" class="auth-back-button" id="auth-back">Back</button>
+      </form>
+      <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+    </section>
+  </div>
   <script>
     const birthdateInput = document.getElementById('birthdate');
     const lifespanInput = document.getElementById('lifespan');
@@ -160,6 +191,11 @@
       generateCalendar();
     });
     generateCalendar();
+    document.addEventListener('lifeIsShortDataReady', () => {
+      birthdateInput.value = localStorage.getItem('calendarBirthdate') || '1990-01-01';
+      lifespanInput.value = localStorage.getItem('calendarLifespan') || '80';
+      generateCalendar();
+    });
   </script>
 </body>
 </html>

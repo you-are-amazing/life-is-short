@@ -36,6 +36,10 @@
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="static/js/dev-note.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+  <script src="static/js/auth.js" defer></script>
 
   <!-- Structured data so Google can understand what this app is -->
   <script type="application/ld+json">
@@ -60,7 +64,7 @@
   }
   </script>
 </head>
-<body>
+<body class="auth-lock">
   <div class="sidebar">
     <div class="sidebar-header">
       <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
@@ -94,8 +98,9 @@
 
   <main>
     <header class="site-header">
-      <span>Life is Short</span>
+      <span id="site-greeting">Life Is Short</span>
       <div class="header-actions">
+        <div id="auth-account-actions" class="auth-account-actions" hidden></div>
         <a class="credit-link" href="#" data-dev-note-trigger title="Developer Note" aria-label="Open developer note" role="button" onclick="window.openDeveloperNoteModal && window.openDeveloperNoteModal(event); return false;">
           <i class="fa-brands fa-github"></i> Developer Note
         </a>
@@ -250,6 +255,76 @@
       </div>
     </form>
   </dialog>
+
+  <dialog id="password-dialog" class="auth-password-dialog">
+    <form class="auth-form" id="password-form" novalidate>
+      <h2>Update password</h2>
+      <p class="auth-password-warning">Please save your password somewhere else too. This site does not offer password recovery.</p>
+      <label for="current-password">Current password</label>
+      <input id="current-password" type="password" autocomplete="current-password" required>
+      <label for="new-password">New password</label>
+      <input id="new-password" type="password" autocomplete="new-password" minlength="6" required>
+      <label for="confirm-password">Confirm new password</label>
+      <input id="confirm-password" type="password" autocomplete="new-password" minlength="6" required>
+      <p class="auth-error" id="password-error" role="alert"></p>
+      <button type="submit" class="auth-button auth-button-primary" id="password-submit">Update password</button>
+      <button type="button" class="auth-back-button" id="password-cancel">Cancel</button>
+    </form>
+  </dialog>
+
+  <div class="auth-overlay" id="auth-overlay">
+    <section class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div class="auth-modal-heading">
+        <span class="auth-kicker">Life is Short</span>
+        <h1 id="auth-title">Make this time yours.</h1>
+        <p id="auth-description">Sign in to keep your progress with you, or continue locally as a guest.</p>
+      </div>
+
+      <!-- Step 1: choose -->
+      <div class="auth-choice-buttons" id="auth-choice-buttons">
+        <button type="button" class="auth-button auth-button-primary" data-auth-choice="signin">Sign In</button>
+        <button type="button" class="auth-button" data-auth-choice="signup">Sign Up</button>
+        <button type="button" class="auth-button auth-button-quiet" data-auth-choice="guest">Continue as Guest</button>
+      </div>
+
+      <!-- Step 2: sign in / sign up form -->
+      <form class="auth-form" id="auth-form" hidden novalidate>
+        <div class="auth-name-field" id="auth-name-field" hidden>
+          <label for="auth-name">Name</label>
+          <input id="auth-name" name="name" type="text" autocomplete="name" placeholder="What should we call you?">
+        </div>
+        <label for="auth-email">Email</label>
+        <input id="auth-email" name="email" type="email" autocomplete="email" required>
+        <label for="auth-password">Password</label>
+        <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="6" required>
+        <p class="auth-error" id="auth-error" role="alert"></p>
+        <button type="submit" class="auth-button auth-button-primary" id="auth-submit">Sign In</button>
+        <button type="button" class="auth-inline-toggle" id="auth-mode-toggle">
+          Don't have an account? <span>Sign up</span>
+        </button>
+        <button type="button" class="auth-back-button" id="auth-back">Back</button>
+      </form>
+
+      <!-- Step 3: guest-mode confirmation -->
+      <div class="auth-guest-confirm" id="auth-guest-confirm" hidden>
+        <div class="auth-guest-icon"><i class="fa-solid fa-hard-drive"></i></div>
+        <p class="auth-guest-message">
+          As a guest, your goals, notes, and calendar are saved only in <strong>this browser, on this device</strong>.
+          Come back here anytime and it'll all be waiting for you — but clearing your browser data or switching
+          devices means it won't come with you.
+        </p>
+        <div class="auth-guest-name-field">
+          <label for="auth-guest-name">Name (optional)</label>
+          <input id="auth-guest-name" type="text" autocomplete="name" placeholder="What should we call you?">
+        </div>
+        <button type="button" class="auth-button auth-button-primary" id="auth-guest-confirm-btn">Got it, continue as guest</button>
+        <button type="button" class="auth-button auth-button-quiet" id="auth-guest-signup-btn">Sign up instead</button>
+        <button type="button" class="auth-back-button" id="auth-guest-back">Back</button>
+      </div>
+
+      <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+    </section>
+  </div>
 
   <script>
     // Show current date/time
@@ -1455,6 +1530,11 @@
     renderSheetTabs();
     renderSheet();
     loadGoals();
+    document.addEventListener('lifeIsShortDataReady', () => {
+      renderSheetTabs();
+      renderSheet();
+      loadGoals();
+    });
   </script>
 </body>
 </html>

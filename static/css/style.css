@@ -623,6 +623,187 @@ body.dev-note-lock {
   color: #fff;
 }
 
+/* Authentication overlay and account controls */
+body.auth-lock {
+  overflow: hidden;
+}
+
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(9, 13, 22, 0.72);
+}
+
+.auth-overlay[hidden] {
+  display: none;
+}
+
+.auth-modal {
+  width: min(440px, 100%);
+  padding: 2rem;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-modal-heading {
+  margin-bottom: 1.5rem;
+}
+
+.auth-kicker {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auth-modal h1 {
+  font-size: 1.5rem;
+}
+
+.auth-modal p {
+  margin-bottom: 0;
+}
+
+.auth-choice-buttons,
+.auth-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.auth-button,
+.auth-back-button,
+.auth-inline-button {
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.auth-button:hover,
+.auth-back-button:hover,
+.auth-inline-button:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.auth-button-primary {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.auth-button-primary:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: #fff;
+}
+
+.auth-button-quiet,
+.auth-back-button {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.auth-form label {
+  margin-bottom: -0.45rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--background-color);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.auth-error {
+  min-height: 1.5rem;
+  margin: 0 !important;
+  color: var(--error-color) !important;
+  font-size: 0.88rem;
+}
+
+.auth-status {
+  margin-top: 1rem !important;
+  color: var(--text-muted) !important;
+  font-size: 0.82rem;
+}
+
+.auth-account-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.auth-password-dialog {
+  width: min(440px, calc(100% - 2rem));
+  padding: 2rem;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-password-dialog::backdrop {
+  background: rgba(9, 13, 22, 0.72);
+}
+
+.auth-password-dialog h2 {
+  margin: 0 0 0.5rem;
+}
+
+.auth-password-warning {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.auth-inline-button {
+  min-height: auto;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .auth-account-label {
+    display: none;
+  }
+
+  .auth-modal {
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 480px) {
   .dev-note-modal {
     padding: 1.5rem;
@@ -2049,4 +2230,101 @@ textarea:focus {
   .stat-number {
     font-size: 1.5rem;
   }
+}
+/* Auth: [hidden] must win over the display:grid rule on these containers,
+   otherwise all three auth steps render stacked on top of each other. */
+.auth-choice-buttons[hidden],
+.auth-form[hidden],
+.auth-guest-confirm[hidden] {
+  display: none !important;
+}
+
+/* Auth: link-style toggle between Sign In / Sign Up inside the form */
+.auth-inline-toggle {
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  margin-top: -0.25rem;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.auth-inline-toggle span {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.auth-inline-toggle:hover span {
+  text-decoration: underline;
+}
+
+/* Auth: guest-mode confirmation step */
+.auth-guest-confirm {
+  display: grid;
+  gap: 0.9rem;
+  text-align: center;
+}
+
+.auth-guest-icon {
+  justify-self: center;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  color: var(--primary-color);
+  font-size: 1.25rem;
+}
+
+.auth-guest-message {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.auth-guest-message strong {
+  color: var(--text-primary);
+}
+/* Auth: name field inside the sign-in/up form (shown for Sign Up only) */
+.auth-name-field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.auth-name-field[hidden] {
+  display: none;
+}
+
+/* Auth: optional name field inside the guest-mode confirmation step */
+.auth-guest-name-field {
+  display: grid;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.auth-guest-name-field label {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-guest-name-field input {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--background-color);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.auth-guest-name-field input:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
