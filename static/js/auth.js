@@ -142,7 +142,15 @@ function setAccountActions(user, mode) {
     logoutButton.type = 'button';
     logoutButton.className = 'auth-inline-button';
     logoutButton.textContent = 'Log out';
-    logoutButton.addEventListener('click', () => lifeIsShortAuth.signOut());
+    logoutButton.addEventListener('click', async () => {
+      logoutButton.disabled = true;
+      try {
+        await lifeIsShortAuth.signOut();
+      } catch (error) {
+        logoutButton.disabled = false;
+        setAuthError(readableAuthError(error));
+      }
+    });
     actions.appendChild(logoutButton);
   } else {
     const signupButton = document.createElement('button');
@@ -224,8 +232,13 @@ function showAuthForm(mode) {
   form.hidden = false;
   if (submit) submit.textContent = mode === 'signup' ? 'Create account' : 'Sign In';
   form.dataset.mode = mode;
-  if (nameField) nameField.hidden = mode !== 'signup';
-  if (nameInput) nameInput.required = mode === 'signup';
+  if (nameField) nameField.hidden = false;
+  if (nameInput) {
+    nameInput.required = mode === 'signup';
+    nameField?.querySelector('label')?.replaceChildren(
+      document.createTextNode(mode === 'signup' ? 'Name' : 'Name (optional)')
+    );
+  }
   description.textContent = mode === 'signup'
     ? 'Create an account to keep your progress across devices.'
     : 'Welcome back. Your progress is waiting.';
@@ -299,7 +312,10 @@ function startFirebase() {
     lifeIsShortUser = null;
     setAccountActions(null, 'guest');
     const hasGuestMode = localStorage.getItem(LIFE_IS_SHORT_MODE_KEY) === 'guest';
-    if (!hasGuestMode) localStorage.removeItem(LIFE_IS_SHORT_NAME_KEY);
+    if (!hasGuestMode) {
+      localStorage.removeItem(LIFE_IS_SHORT_NAME_KEY);
+      showAuthChoices();
+    }
     updateSiteGreeting();
     setAuthOverlayVisible(!hasGuestMode);
   });
@@ -371,7 +387,11 @@ function setupAuthUi() {
         localStorage.setItem(LIFE_IS_SHORT_NAME_KEY, name);
         updateSiteGreeting();
       } else {
-        await lifeIsShortAuth.signInWithEmailAndPassword(email, password);
+        const credential = await lifeIsShortAuth.signInWithEmailAndPassword(email, password);
+        if (name) {
+          await credential.user.updateProfile({ displayName: name });
+          localStorage.setItem(LIFE_IS_SHORT_NAME_KEY, name);
+        }
       }
     } catch (error) {
       setAuthError(readableAuthError(error));
