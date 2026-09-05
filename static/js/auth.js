@@ -117,6 +117,10 @@ function readableAuthError(error) {
   return messages[error.code] || 'Something went wrong. Please try again.';
 }
 
+function showPasswordReminder() {
+  alert('Please save your password somewhere else too. This site does not offer password recovery.');
+}
+
 function setAccountActions(user, mode) {
   const actions = document.getElementById('auth-account-actions');
   if (!actions) return;
@@ -203,7 +207,7 @@ function setupPasswordForm() {
       await lifeIsShortUser.updatePassword(newPassword);
       form.reset();
       dialog.close();
-      alert('Password updated. Please save it somewhere else too; this site does not offer password recovery.');
+      showPasswordReminder();
     } catch (passwordError) {
       error.textContent = passwordError.code === 'auth/wrong-password'
         ? 'The current password is incorrect.'
@@ -386,6 +390,7 @@ function setupAuthUi() {
         await credential.user.updateProfile({ displayName: name });
         localStorage.setItem(LIFE_IS_SHORT_NAME_KEY, name);
         updateSiteGreeting();
+        showPasswordReminder();
       } else {
         const credential = await lifeIsShortAuth.signInWithEmailAndPassword(email, password);
         if (name) {
