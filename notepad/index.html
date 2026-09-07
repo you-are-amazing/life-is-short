@@ -20,7 +20,7 @@
   <meta property="og:site_name" content="Life is Short">
 
   <link rel="icon" href="../favicon.png" type="image/png">
-  <link rel="stylesheet" href="../static/css/style.css?v=17">
+  <link rel="stylesheet" href="../static/css/style.css?v=18">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
-  <script src="../static/js/auth.js?v=3" defer></script>
+  <script src="../static/js/auth.js?v=4" defer></script>
   <style>
     .notepad-container {
       display: flex;
@@ -410,6 +410,7 @@
       align-items: center;
       gap: 10px;
       flex-shrink: 0;
+      min-width: 0;
       border-bottom: 1px solid var(--editor-border);
       padding: 16px 18px 12px;
       background: var(--editor-toolbar-bg);
@@ -957,11 +958,34 @@
       .doc-actions {
         justify-content: center;
       }
+
+      .editor-toolbar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+      }
+
+      .editor-toolbar .tool-group {
+        flex: 0 0 auto;
+      }
+
+      .editor-toolbar .tool-group-right {
+        margin-left: 0;
+      }
+
+      .doc-surface {
+        min-width: 0;
+      }
+
+      .editor-content {
+        overflow-wrap: anywhere;
+      }
     }
   </style>
 </head>
 
-<body class="auth-lock">
+<body>
   <div class="sidebar">
     <div class="sidebar-header">
       <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
@@ -1034,7 +1058,7 @@
       </div>
     </div>
   </main>
-  <div class="auth-overlay" id="auth-overlay">
+  <div class="auth-overlay" id="auth-overlay" hidden>
     <section class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
       <div class="auth-modal-heading">
         <span class="auth-kicker">Life is Short</span>
@@ -1102,7 +1126,7 @@
               <i class="fa-solid fa-droplet"></i>
             </button>
             <div class="text-color-palette" data-color-palette role="dialog" aria-label="Text color palette">
-              <button type="button" class="palette-none" data-color-value="inherit">
+              <button type="button" class="palette-none" data-color-value="default">
                 <span class="none-icon"><i class="fa-solid fa-ban"></i></span>
                 <span>None</span>
               </button>
@@ -2203,7 +2227,11 @@
 
       function applyTextColor(color) {
         contentInput.focus();
-        document.execCommand('foreColor', false, color);
+        const editorTheme = notepadEditor.classList.contains('dark-theme') ? 'dark' : 'light';
+        const appliedColor = color === 'default'
+          ? (editorTheme === 'dark' ? '#f4f4f4' : '#1a1a1a')
+          : color;
+        document.execCommand('foreColor', false, appliedColor);
         closeColorPalette();
       }
 
@@ -2226,11 +2254,7 @@
           const swatch = event.target.closest('[data-color-value]');
           if (swatch) {
             const value = swatch.dataset.colorValue;
-            if (value === 'inherit') {
-              applyTextColor('inherit');
-            } else {
-              applyTextColor(value);
-            }
+            applyTextColor(value);
           }
         });
 

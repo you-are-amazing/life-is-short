@@ -16,7 +16,7 @@
   <meta property="og:site_name" content="Life is Short">
   
   <link rel="icon" href="../favicon.png" type="image/png">
-  <link rel="stylesheet" href="../static/css/style.css?v=17">
+  <link rel="stylesheet" href="../static/css/style.css?v=18">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -25,9 +25,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
-  <script src="../static/js/auth.js?v=3" defer></script>
+  <script src="../static/js/auth.js?v=4" defer></script>
 </head>
-<body class="auth-lock">
+<body>
   <div class="sidebar">
     <div class="sidebar-header"><button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></div>
     <div class="sidebar-content">
@@ -72,7 +72,7 @@
       </div>
     </section>
   </main>
-  <div class="auth-overlay" id="auth-overlay">
+  <div class="auth-overlay" id="auth-overlay" hidden>
     <section class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
       <div class="auth-modal-heading">
         <span class="auth-kicker">Life is Short</span>
