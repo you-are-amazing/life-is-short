@@ -36,6 +36,7 @@
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="static/js/dev-note.js" defer></script>
+  <script src="static/js/sticky-notes.js?v=1" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
@@ -101,6 +102,10 @@
       <span id="site-greeting">Life Is Short</span>
       <div class="header-actions">
         <div id="auth-account-actions" class="auth-account-actions" hidden></div>
+        <button type="button" class="sticky-bell-btn" id="sticky-bell-btn" title="Open sticky notes" aria-label="Open sticky notes">
+          <i class="fa-solid fa-thumbtack" aria-hidden="true"></i>
+          <span class="sticky-bell-badge" id="sticky-bell-badge" hidden>0</span>
+        </button>
         <a class="credit-link" href="#" data-dev-note-trigger title="Developer Note" aria-label="Open developer note" role="button" onclick="window.openDeveloperNoteModal && window.openDeveloperNoteModal(event); return false;">
           <i class="fa-brands fa-github"></i> Developer Note
         </a>
@@ -255,6 +260,30 @@
       </div>
     </form>
   </dialog>
+
+  <dialog id="sticky-notes-dialog" class="goal-dialog sticky-notes-dialog">
+    <form method="dialog">
+      <h3>Sticky Notes <span class="sticky-notes-subtitle">Important reminders</span></h3>
+      <div class="sticky-add-row">
+        <input type="text" id="sticky-note-text" placeholder="Add an important task..." maxlength="200">
+        <button type="button" class="dialog-btn primary" id="sticky-add-btn">Add</button>
+      </div>
+      <div id="sticky-notes-list" class="sticky-notes-list"></div>
+      <div class="sticky-glow-toggle-row">
+        <span class="sticky-toggle-label">Glow reminder on header<span class="sticky-toggle-hint">Pulses while tasks are pending</span></span>
+        <label class="switch"><input type="checkbox" id="sticky-glow-toggle" checked aria-label="Enable glow reminder"><span class="switch-slider"></span></label>
+      </div>
+      <div class="dialog-buttons"><button type="button" class="dialog-btn secondary" id="sticky-notes-close">Close</button></div>
+    </form>
+  </dialog>
+  <div class="sticky-reminder-overlay" id="sticky-reminder-overlay" hidden>
+    <div class="sticky-reminder-modal" role="alertdialog" aria-modal="true" aria-labelledby="sticky-reminder-title">
+      <div class="sticky-reminder-icon"><i class="fa-solid fa-thumbtack"></i></div>
+      <h2 id="sticky-reminder-title">You have pending important tasks</h2>
+      <ul class="sticky-reminder-list" id="sticky-reminder-list"></ul>
+      <div class="sticky-reminder-actions"><button type="button" class="auth-button auth-button-primary" id="sticky-reminder-open">Open sticky notes</button><button type="button" class="auth-back-button" id="sticky-reminder-dismiss">Dismiss for now</button></div>
+    </div>
+  </div>
 
   <dialog id="password-dialog" class="auth-password-dialog">
     <form class="auth-form" id="password-form" novalidate>

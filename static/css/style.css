@@ -415,11 +415,13 @@ main {
   color: var(--text-primary);
   font-weight: 700;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .site-header > span {
   font-size: 2rem;
   line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
 .site-header a {
@@ -461,8 +463,8 @@ main {
   font-size: 1rem;
 }
 
-/* Wraps the credit link + developer note trigger together so they sit as
-   one group on the right side of the header, next to each other. */
+/* Wraps the account pill, sticky-notes bell, and developer note trigger
+   together so they sit as one clean group on the right side of the header. */
 .site-header .header-actions {
   display: flex;
   align-items: center;
@@ -471,6 +473,25 @@ main {
   margin-left: auto;
   min-width: 0;
   flex-wrap: wrap;
+  padding: 0;
+}
+
+.auth-account-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.4rem;
+  padding: 0.25rem 0.35rem 0.25rem 0.75rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+}
+
+.auth-account-label {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dev-note-trigger-btn {
@@ -764,9 +785,22 @@ body.auth-lock {
 .auth-account-actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   color: var(--text-secondary);
   font-size: 0.78rem;
+  padding: 0.3rem 0.4rem 0.3rem 0.9rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.auth-account-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  padding-right: 0.15rem;
+  border-right: 1px solid var(--border-color);
+  margin-right: 0.1rem;
 }
 
 .auth-password-dialog {
@@ -795,8 +829,14 @@ body.auth-lock {
 
 .auth-inline-button {
   min-height: auto;
-  padding: 0.4rem 0.7rem;
+  padding: 0.4rem 0.75rem;
   font-size: 0.78rem;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: var(--surface-hover);
+}
+
+.auth-inline-button:hover {
+  background: var(--surface-hover);
 }
 
 @media (max-width: 640px) {
@@ -1765,6 +1805,11 @@ footer a {
     flex-wrap: wrap;
   }
 
+  .auth-account-label {
+    border-right: none;
+    padding-right: 0;
+  }
+
   .site-header a {
     font-size: 0.8rem;
   }
@@ -2394,4 +2439,305 @@ textarea:focus {
 .auth-guest-name-field input:focus {
   outline: none;
   border-color: var(--primary-color);
+}
+/* ===================================================================
+   Sticky Notes (important-task reminders) + glow indicator
+   =================================================================== */
+
+.sticky-bell-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  background: var(--surface-color);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.sticky-bell-btn:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.sticky-bell-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  border: 2px solid var(--surface-color);
+}
+
+/* "Blowing"/pulsing glow shown when important tasks are pending and the
+   glow setting is enabled. */
+.sticky-bell-btn.glow {
+  color: #f59e0b;
+  border-color: #f59e0b;
+  animation: sticky-glow-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes sticky-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 9px rgba(245, 158, 11, 0);
+  }
+}
+
+.sticky-notes-dialog {
+  max-width: 440px;
+}
+
+.sticky-notes-dialog h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sticky-notes-subtitle {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.sticky-add-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sticky-add-row input[type="text"] {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  background: var(--surface-color);
+  color: var(--text-primary);
+}
+
+.sticky-add-row input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.sticky-notes-list {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.sticky-notes-empty {
+  margin: 0;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.sticky-note-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sticky-note-item:last-child {
+  border-bottom: none;
+}
+
+.sticky-note-item.completed {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+}
+
+[data-theme="dark"] .sticky-note-item.completed {
+  background: linear-gradient(135deg, #163329, #1d4737);
+}
+
+.sticky-note-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.sticky-glow-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--surface-hover);
+  border-radius: var(--radius-md);
+}
+
+.sticky-toggle-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+}
+
+.sticky-toggle-hint {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+/* Simple on/off switch, reused for the glow toggle */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  background: var(--border-color);
+  border-radius: 999px;
+  transition: background var(--transition-fast);
+}
+
+.switch-slider::before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+}
+
+.switch input:checked + .switch-slider {
+  background: var(--primary-color);
+}
+
+.switch input:checked + .switch-slider::before {
+  transform: translateX(18px);
+}
+
+.switch input:focus-visible + .switch-slider {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Reminder popup shown when the user returns with pending sticky notes */
+.sticky-reminder-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(9, 13, 22, 0.6);
+}
+
+.sticky-reminder-overlay[hidden] {
+  display: none;
+}
+
+.sticky-reminder-modal {
+  width: min(420px, 100%);
+  padding: 2rem;
+  text-align: center;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.sticky-reminder-icon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  font-size: 1.3rem;
+  animation: sticky-glow-pulse 1.8s ease-in-out infinite;
+}
+
+.sticky-reminder-modal h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.2rem;
+}
+
+.sticky-reminder-list {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sticky-reminder-list li {
+  padding: 0.6rem 0.8rem;
+  background: var(--surface-hover);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.sticky-reminder-actions {
+  display: grid;
+  gap: 0.6rem;
+}
+
+@media (max-width: 480px) {
+  .auth-account-actions {
+    width: 100%;
+    justify-content: space-between;
+    border-radius: var(--radius-md);
+  }
+
+  .auth-account-label {
+    max-width: 7rem;
+  }
+
+  .sticky-notes-dialog {
+    width: 92vw;
+  }
 }
