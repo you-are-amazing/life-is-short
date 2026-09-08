@@ -17,21 +17,21 @@
     body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--canvas); font-family: 'Inter', sans-serif; }
     .app-shell { display: grid; grid-template-columns: 270px 1fr; min-height: 100vh; transition: grid-template-columns .2s ease; }
     .app-shell.sidebar-hidden { grid-template-columns: 0 1fr; }
-    aside { position: relative; padding: 28px 22px; border-right: 1px solid var(--line); background: var(--paper); box-shadow: var(--shadow); overflow: hidden; transition: padding .2s ease; }
-    .app-shell.sidebar-hidden aside { padding: 28px 0; border-right: 0; box-shadow: none; }
+    aside { position: relative; display: flex; flex-direction: column; height: 100%; border-right: 1px solid var(--line); background: var(--paper); box-shadow: var(--shadow); overflow: hidden; }
+    .app-shell.sidebar-hidden aside { border-right: 0; box-shadow: none; }
     .app-shell.sidebar-hidden aside > * { display: none; }
+    .sidebar-scroll { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 24px 22px 16px; }
     .brand { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 22px; }
     .brand strong { color: var(--accent); font: 700 20px 'Inter', sans-serif; }
-    .brand a { color: var(--muted); text-decoration: none; font-size: 14px; }
-    .brand a:hover { color: var(--accent); }
-    .toolbar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 34px; }
-    .new-note { flex: 1; border: 0; border-radius: 6px; padding: 13px 16px; color: white; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); font: 600 14px 'Inter', sans-serif; cursor: pointer; box-shadow: var(--shadow); }
+    .new-note { display: block; width: 100%; border: 0; border-radius: 6px; padding: 13px 16px; margin-bottom: 26px; color: white; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); font: 600 14px 'Inter', sans-serif; cursor: pointer; box-shadow: var(--shadow); }
     .new-note:hover { background: linear-gradient(135deg, var(--accent-dark), var(--accent)); }
-    .icon-btn { flex: none; width: 42px; height: 42px; border: 2px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--paper); cursor: pointer; box-shadow: var(--shadow); font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .icon-btn { flex: none; width: 42px; height: 42px; border: 2px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--paper); cursor: pointer; box-shadow: var(--shadow); font-size: 16px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
     .icon-btn:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.05); }
+    .icon-btn svg { width: 16px; height: 16px; display: block; }
+    .icon-btn-sm { width: 34px; height: 34px; font-size: 14px; }
     .notes-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-    #note-list { display: grid; gap: 4px; }
-    .note-item { display: flex; align-items: center; gap: 6px; width: 100%; padding: 6px 6px 6px 12px; border: 0; border-radius: 5px; color: var(--ink); background: transparent; }
+    #note-list { display: grid; gap: 4px; min-width: 0; }
+    .note-item { display: flex; align-items: center; gap: 6px; width: 100%; min-width: 0; padding: 6px 6px 6px 12px; border: 0; border-radius: 5px; color: var(--ink); background: transparent; }
     .note-item:hover, .note-item.active { background: var(--accent-soft); color: var(--ink); }
     .note-item-main { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 5px 0; color: inherit; cursor: pointer; font: inherit; }
     .note-item-main strong, .note-item-main span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -40,6 +40,7 @@
     .note-item-delete { flex: none; width: 24px; height: 24px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; display: flex; align-items: center; justify-content: center; }
     .note-item-delete:hover { background: #ef4444; color: white; }
     .empty-list { padding: 12px; color: var(--muted); font-size: 13px; }
+    .sidebar-footer { flex: none; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-top: 1px solid var(--line); background: var(--paper); }
     main { display: flex; flex-direction: column; min-width: 0; position: relative; }
     .sidebar-reveal { display: none; position: fixed; top: 22px; left: 14px; z-index: 5; }
     .app-shell.sidebar-hidden .sidebar-reveal { display: flex; }
@@ -55,24 +56,41 @@
     #note-body blockquote { margin: 20px 0; padding-left: 18px; border-left: 3px solid var(--accent); color: var(--muted); }
     /* Highlight is a fixed-contrast mark: always readable regardless of light/dark theme */
     #note-body mark.note-highlight { background: #f8d878; color: #1e293b; padding: 0 1px; border-radius: 2px; }
-    @media (max-width: 700px) { .app-shell { display: block; } .app-shell.sidebar-hidden aside { display: none; } aside { padding: 18px; border-right: 0; border-bottom: 1px solid var(--line); } .brand { margin-bottom: 14px; } .toolbar-row { margin-bottom: 22px; } #note-list { display: flex; overflow-x: auto; } .note-item { min-width: 190px; } .editor-wrap { padding-top: 42px; } }
+    @media (max-width: 700px) {
+      .app-shell { display: block; }
+      .app-shell.sidebar-hidden aside { display: none; }
+      aside { height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .sidebar-scroll { padding: 18px; max-height: 40vh; }
+      .brand { margin-bottom: 14px; }
+      #note-list { display: flex; overflow-x: auto; }
+      .note-item { min-width: 190px; }
+      .editor-wrap { padding-top: 42px; }
+    }
   </style>
 </head>
 <body>
   <div class="app-shell" id="app-shell">
     <button class="icon-btn sidebar-reveal" id="sidebar-reveal" type="button" title="Show sidebar" aria-label="Show sidebar">&raquo;</button>
     <aside>
-      <div class="brand">
-        <strong>Life is Short</strong>
-        <a href="../" aria-label="Back to home">Close</a>
-      </div>
-      <div class="toolbar-row">
+      <div class="sidebar-scroll">
+        <div class="brand">
+          <strong>Life is Short</strong>
+          <a href="../" class="icon-btn icon-btn-sm" title="Home" aria-label="Back to home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 9.5 12 3l9 6.5"></path>
+              <path d="M5 9.5V21h14V9.5"></path>
+              <path d="M9 21v-6h6v6"></path>
+            </svg>
+          </a>
+        </div>
         <button class="new-note" id="new-note" type="button">+ New note</button>
+        <div class="notes-heading"><span>Your notes</span><span id="note-count">0</span></div>
+        <div id="note-list" aria-label="Saved notes"></div>
+      </div>
+      <div class="sidebar-footer">
         <button class="icon-btn" id="theme-toggle" type="button" title="Switch to light mode" aria-label="Switch to light mode" aria-pressed="true">&#9788;</button>
         <button class="icon-btn" id="sidebar-hide" type="button" title="Hide sidebar" aria-label="Hide sidebar">&laquo;</button>
       </div>
-      <div class="notes-heading"><span>Your notes</span><span id="note-count">0</span></div>
-      <div id="note-list" aria-label="Saved notes"></div>
     </aside>
     <main>
       <section class="editor-wrap" aria-label="Note editor">
