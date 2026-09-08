@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, session, redirect, url_for
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
@@ -18,6 +18,7 @@ login_manager.login_view = 'login'
 
 # Database configuration
 basedir = os.path.abspath(os.path.dirname(__file__))
+os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'goals.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -136,6 +137,11 @@ def index():
 @app.route('/calendar')
 def calendar():
     return render_template('calendar.html')
+
+@app.route('/notepad')
+@app.route('/notepad/')
+def notepad():
+    return send_from_directory(os.path.join(basedir, 'notepad'), 'index.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
