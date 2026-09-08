@@ -6,45 +6,47 @@
   <title>Notepad - Life is Short</title>
   <meta name="description" content="Write, organize, and revisit your personal notes.">
   <link rel="icon" href="../lifeisshort.png" type="image/png">
+  <link rel="stylesheet" href="../static/css/style.css?v=18">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root { --ink: #17202a; --muted: #718096; --paper: #fffdf8; --line: #e8e1d6; --accent: #c85c3b; --accent-soft: #f7e1d7; --canvas: #f3efe8; }
+    :root { --ink: #1e293b; --muted: #64748b; --paper: #ffffff; --line: #e2e8f0; --accent: #6366f1; --accent-soft: #eef2ff; --canvas: #f8fafc; --accent-dark: #4f46e5; --surface-hover: #f1f5f9; --shadow: 0 4px 12px rgba(15, 23, 42, .08); }
+    [data-theme="dark"] { --ink: #f9fafb; --muted: #d1d5db; --paper: #1f2937; --line: #4b5563; --accent-soft: #312e81; --canvas: #111827; --surface-hover: #374151; --shadow: 0 4px 12px rgba(0, 0, 0, .28); }
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--canvas); font-family: 'DM Sans', sans-serif; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--canvas); font-family: 'Inter', sans-serif; }
     .app-shell { display: grid; grid-template-columns: 270px 1fr; min-height: 100vh; }
-    aside { padding: 28px 22px; border-right: 1px solid var(--line); background: var(--paper); }
+    aside { padding: 28px 22px; border-right: 1px solid var(--line); background: var(--paper); box-shadow: var(--shadow); }
     .brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; }
-    .brand strong { font: 700 20px 'Libre Baskerville', serif; }
+    .brand strong { color: var(--accent); font: 700 20px 'Inter', sans-serif; }
     .brand a, .back-link { color: var(--muted); text-decoration: none; }
     .brand a:hover, .back-link:hover { color: var(--accent); }
-    .new-note { width: 100%; border: 0; border-radius: 6px; padding: 13px 16px; color: white; background: var(--accent); font: 600 14px 'DM Sans', sans-serif; cursor: pointer; }
-    .new-note:hover { background: #a9482e; }
+    .new-note { width: 100%; border: 0; border-radius: 6px; padding: 13px 16px; color: white; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); font: 600 14px 'Inter', sans-serif; cursor: pointer; box-shadow: var(--shadow); }
+    .new-note:hover { background: linear-gradient(135deg, var(--accent-dark), var(--accent)); }
     .notes-heading { display: flex; align-items: center; justify-content: space-between; margin: 34px 0 10px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
     #note-list { display: grid; gap: 4px; }
     .note-item { display: block; width: 100%; padding: 11px 12px; border: 0; border-radius: 5px; color: var(--ink); background: transparent; text-align: left; cursor: pointer; }
-    .note-item:hover, .note-item.active { background: var(--accent-soft); }
+    .note-item:hover, .note-item.active { background: var(--accent-soft); color: var(--ink); }
     .note-item strong, .note-item span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .note-item strong { margin-bottom: 3px; font-size: 14px; }
     .note-item span { color: var(--muted); font-size: 12px; }
     .empty-list { padding: 12px; color: var(--muted); font-size: 13px; }
     main { display: flex; flex-direction: column; min-width: 0; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 22px 6vw; border-bottom: 1px solid var(--line); background: rgba(255,253,248,.72); }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 22px 6vw; border-bottom: 1px solid var(--line); background: var(--paper); }
     .back-link { font-size: 14px; }
     .save-state { color: var(--muted); font-size: 13px; }
     .editor-wrap { width: min(850px, calc(100% - 48px)); margin: 0 auto; padding: 68px 0 100px; }
-    #note-title { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; font: 700 clamp(28px, 5vw, 48px) 'Libre Baskerville', serif; }
-    #note-title::placeholder { color: #b7afa4; }
+    #note-title { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; font: 700 clamp(28px, 5vw, 48px) 'Inter', sans-serif; }
+    #note-title::placeholder { color: var(--muted); }
     .meta { margin: 12px 0 26px; color: var(--muted); font-size: 13px; }
     .toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
-    .toolbar button { min-width: 34px; height: 32px; border: 1px solid var(--line); border-radius: 4px; color: var(--ink); background: var(--paper); font-weight: 700; cursor: pointer; }
+    .toolbar button { min-width: 34px; height: 32px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: var(--paper); font-weight: 700; cursor: pointer; box-shadow: var(--shadow); }
     .toolbar button:hover { border-color: var(--accent); color: var(--accent); }
-    #note-body { min-height: 420px; outline: 0; color: #35404a; font: 400 17px/1.85 'Libre Baskerville', serif; }
-    #note-body:empty::before { content: 'Begin writing...'; color: #b7afa4; pointer-events: none; }
+    #note-body { min-height: 420px; outline: 0; color: var(--ink); font: 400 17px/1.85 'Inter', sans-serif; }
+    #note-body:empty::before { content: 'Begin writing...'; color: var(--muted); pointer-events: none; }
     #note-body blockquote { margin: 20px 0; padding-left: 18px; border-left: 3px solid var(--accent); color: var(--muted); }
     .editor-actions { display: flex; justify-content: flex-end; margin-top: 42px; }
-    .editor-actions button { padding: 10px 16px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); cursor: pointer; }
+    .editor-actions button { padding: 10px 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); cursor: pointer; box-shadow: var(--shadow); }
     .editor-actions .delete { color: #a33b35; }
     @media (max-width: 700px) { .app-shell { display: block; } aside { padding: 18px; border-right: 0; border-bottom: 1px solid var(--line); } .brand { margin-bottom: 18px; } .notes-heading { margin-top: 22px; } #note-list { display: flex; overflow-x: auto; } .note-item { min-width: 190px; } .topbar { padding: 17px 24px; } .editor-wrap { padding-top: 42px; } }
   </style>
