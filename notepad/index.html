@@ -3,1567 +3,177 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Primary SEO -->
-  <title>Life is Short – Progress Tracker & Goal Manager</title>
-  <meta name="description" content="Life is Short is a free progress tracker and goal manager. Watch your year, month, and week fill up in real time while you set and track daily, weekly, monthly, and yearly goals.">
-  <meta name="keywords" content="life is short, progress tracker, goal tracker, goal manager, productivity app, life progress bar, life calendar, daily goals, weekly goals, yearly goals">
-  <meta name="robots" content="index, follow">
-  <meta name="author" content="Twisha Patel">
-  <link rel="canonical" href="https://you-are-amazing.github.io/life-is-short/">
-
-  <!-- Open Graph / Facebook / LinkedIn -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Life is Short">
-  <meta property="og:title" content="Life is Short – Progress Tracker & Goal Manager">
-  <meta property="og:description" content="Watch your year, month, and week fill up in real time while you set and track daily, weekly, monthly, and yearly goals.">
-  <meta property="og:url" content="https://you-are-amazing.github.io/life-is-short/">
-  <meta property="og:locale" content="en_US">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Life is Short – Progress Tracker & Goal Manager">
-  <meta name="twitter:description" content="Watch your year, month, and week fill up in real time while you set and track daily, weekly, monthly, and yearly goals.">
-
-  <meta name="theme-color" content="#0f172a">
-  <meta name="google-site-verification" content="bSoIwMjn7Sn1qpFvOHyValS_ke_jmvzf1dNajmOdVN8" />
-
+  <title>Notepad - Life is Short</title>
+  <meta name="description" content="Write, organize, and revisit your personal notes.">
   <link rel="icon" href="../lifeisshort.png" type="image/png">
-  <link rel="stylesheet" href="../static/css/style.css?v=18">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="../static/js/dev-note.js" defer></script>
-  <script src="../static/js/sticky-notes.js?v=1" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
-  <script src="../static/js/auth.js?v=4" defer></script>
-
-  <!-- Structured data so Google can understand what this app is -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Life is Short",
-    "url": "https://you-are-amazing.github.io/life-is-short/",
-    "description": "A free progress tracker and goal manager. Watch your year, month, and week fill up in real time while you set and track daily, weekly, monthly, and yearly goals.",
-    "applicationCategory": "LifestyleApplication",
-    "operatingSystem": "Any",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "author": {
-      "@type": "Person",
-      "name": "Twisha Patel",
-      "url": "https://github.com/twi-exe"
-    }
-  }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink: #17202a; --muted: #718096; --paper: #fffdf8; --line: #e8e1d6; --accent: #c85c3b; --accent-soft: #f7e1d7; --canvas: #f3efe8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--canvas); font-family: 'DM Sans', sans-serif; }
+    .app-shell { display: grid; grid-template-columns: 270px 1fr; min-height: 100vh; }
+    aside { padding: 28px 22px; border-right: 1px solid var(--line); background: var(--paper); }
+    .brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; }
+    .brand strong { font: 700 20px 'Libre Baskerville', serif; }
+    .brand a, .back-link { color: var(--muted); text-decoration: none; }
+    .brand a:hover, .back-link:hover { color: var(--accent); }
+    .new-note { width: 100%; border: 0; border-radius: 6px; padding: 13px 16px; color: white; background: var(--accent); font: 600 14px 'DM Sans', sans-serif; cursor: pointer; }
+    .new-note:hover { background: #a9482e; }
+    .notes-heading { display: flex; align-items: center; justify-content: space-between; margin: 34px 0 10px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    #note-list { display: grid; gap: 4px; }
+    .note-item { display: block; width: 100%; padding: 11px 12px; border: 0; border-radius: 5px; color: var(--ink); background: transparent; text-align: left; cursor: pointer; }
+    .note-item:hover, .note-item.active { background: var(--accent-soft); }
+    .note-item strong, .note-item span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .note-item strong { margin-bottom: 3px; font-size: 14px; }
+    .note-item span { color: var(--muted); font-size: 12px; }
+    .empty-list { padding: 12px; color: var(--muted); font-size: 13px; }
+    main { display: flex; flex-direction: column; min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 22px 6vw; border-bottom: 1px solid var(--line); background: rgba(255,253,248,.72); }
+    .back-link { font-size: 14px; }
+    .save-state { color: var(--muted); font-size: 13px; }
+    .editor-wrap { width: min(850px, calc(100% - 48px)); margin: 0 auto; padding: 68px 0 100px; }
+    #note-title { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; font: 700 clamp(28px, 5vw, 48px) 'Libre Baskerville', serif; }
+    #note-title::placeholder { color: #b7afa4; }
+    .meta { margin: 12px 0 26px; color: var(--muted); font-size: 13px; }
+    .toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .toolbar button { min-width: 34px; height: 32px; border: 1px solid var(--line); border-radius: 4px; color: var(--ink); background: var(--paper); font-weight: 700; cursor: pointer; }
+    .toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+    #note-body { min-height: 420px; outline: 0; color: #35404a; font: 400 17px/1.85 'Libre Baskerville', serif; }
+    #note-body:empty::before { content: 'Begin writing...'; color: #b7afa4; pointer-events: none; }
+    #note-body blockquote { margin: 20px 0; padding-left: 18px; border-left: 3px solid var(--accent); color: var(--muted); }
+    .editor-actions { display: flex; justify-content: flex-end; margin-top: 42px; }
+    .editor-actions button { padding: 10px 16px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); cursor: pointer; }
+    .editor-actions .delete { color: #a33b35; }
+    @media (max-width: 700px) { .app-shell { display: block; } aside { padding: 18px; border-right: 0; border-bottom: 1px solid var(--line); } .brand { margin-bottom: 18px; } .notes-heading { margin-top: 22px; } #note-list { display: flex; overflow-x: auto; } .note-item { min-width: 190px; } .topbar { padding: 17px 24px; } .editor-wrap { padding-top: 42px; } }
+  </style>
 </head>
 <body>
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
-        <i class="fa-solid fa-gear" aria-hidden="true"></i>
-      </button>
-    </div>
-
-    <div class="sidebar-content">
-      <a href="../calendar/" class="sidebar-link" title="Life Calendar" aria-label="Life Calendar">
-        <i class="fa-solid fa-calendar"></i>
-      </a>
-      <a href="../notepad/" class="sidebar-link" title="Notepad" aria-label="Notepad">
-        <i class="fa-solid fa-book"></i>
-      </a>
-      <div class="sidebar-bottom" style="margin-top: auto; display: flex; flex-direction: column; align-items: center; width: 100%;">
-        <button class="sidebar-link" id="theme-toggle" title="Switch to dark mode" aria-label="Switch to dark mode" aria-pressed="false">
-          <i class="fa-solid fa-moon"></i>
-        </button>
-        <button class="refresh-btn" id="refresh-btn" title="Reset all saved data" aria-label="Reset all saved data" style="margin-top: 0;">
-          <i class="fa-solid fa-rotate-left"></i>
-        </button>
-      </div>
-    </div>
+  <div class="app-shell">
+    <aside>
+      <div class="brand"><strong>Life is Short</strong><a href="../" aria-label="Back to home">Close</a></div>
+      <button class="new-note" id="new-note" type="button">+ New note</button>
+      <div class="notes-heading"><span>Your notes</span><span id="note-count">0</span></div>
+      <div id="note-list" aria-label="Saved notes"></div>
+    </aside>
+    <main>
+      <header class="topbar"><a class="back-link" href="../">&larr; Back to Life is Short</a><span class="save-state" id="save-state">Saved locally</span></header>
+      <section class="editor-wrap" aria-label="Note editor">
+        <input id="note-title" type="text" maxlength="120" placeholder="Untitled note" aria-label="Note title">
+        <div class="meta" id="note-date"></div>
+        <div class="toolbar" role="toolbar" aria-label="Text formatting">
+          <button type="button" data-command="bold" aria-label="Bold">B</button>
+          <button type="button" data-command="italic" aria-label="Italic"><i>I</i></button>
+          <button type="button" data-command="underline" aria-label="Underline"><u>U</u></button>
+          <button type="button" data-command="insertUnorderedList" aria-label="Bulleted list">&bull;</button>
+          <button type="button" data-command="formatBlock" data-value="blockquote" aria-label="Quote">&ldquo;</button>
+          <button type="button" data-command="hiliteColor" data-value="#f8d878" aria-label="Highlight">Highlight</button>
+        </div>
+        <article id="note-body" contenteditable="true" role="textbox" aria-label="Note body"></article>
+        <div class="editor-actions"><button class="delete" id="delete-note" type="button">Delete note</button></div>
+      </section>
+    </main>
   </div>
-
-  <div class="page-scroll-indicator" aria-hidden="true">
-    <div class="page-scroll-track">
-      <div class="page-scroll-thumb"></div>
-    </div>
-  </div>
-
-  <main>
-    <header class="site-header">
-      <span id="site-greeting">Life Is Short</span>
-      <div class="header-actions">
-        <div id="auth-account-actions" class="auth-account-actions" hidden></div>
-        <button type="button" class="sticky-bell-btn" id="sticky-bell-btn" title="Sticky notes / important tasks" aria-label="Open sticky notes">
-          <i class="fa-solid fa-thumbtack"></i>
-          <span class="sticky-bell-badge" id="sticky-bell-badge" hidden>0</span>
-        </button>
-        <a class="credit-link" href="#" data-dev-note-trigger title="Developer Note" aria-label="Open developer note" role="button" onclick="window.openDeveloperNoteModal && window.openDeveloperNoteModal(event); return false;">
-          <i class="fa-brands fa-github"></i> Developer Note
-        </a>
-      </div>
-    </header>
-
-    <div class="datetime" id="datetime"></div>
-
-    <div class="progress-group">
-      <div class="progress-label" id="progress-label-year">Loading...</div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progress-bar-year"></div>
-        <span class="progress-badge" id="progress-badge-year"></span>
-      </div>
-    </div>
-
-    <div class="progress-group">
-      <div class="progress-label" id="progress-label-month">Loading...</div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progress-bar-month"></div>
-        <span class="progress-badge" id="progress-badge-month"></span>
-      </div>
-    </div>
-
-    <div class="progress-group">
-      <div class="progress-label" id="progress-label-week">Loading...</div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progress-bar-week"></div>
-        <span class="progress-badge" id="progress-badge-week"></span>
-      </div>
-    </div>
-
-    <div class="goals-container">
-      <div class="goals-section">
-        <div class="goals-header">
-          <h3>Daily Goals</h3>
-          <button class="small-btn" onclick="addGoal('daily')">+</button>
-        </div>
-        <div id="daily-goals-list" class="goals-list"></div>
-      </div>
-
-      <div class="goals-section">
-        <div class="goals-header">
-          <h3>Weekly Goals</h3>
-          <button class="small-btn" onclick="addGoal('weekly')">+</button>
-        </div>
-        <div id="weekly-goals-list" class="goals-list"></div>
-      </div>
-
-      <div class="goals-section">
-        <div class="goals-header">
-          <h3>Monthly Goals</h3>
-          <button class="small-btn" onclick="addGoal('monthly')">+</button>
-        </div>
-        <div id="monthly-goals-list" class="goals-list"></div>
-      </div>
-
-      <div class="goals-section yearly-goals">
-        <div class="goals-header">
-          <h3>Yearly Goals</h3>
-          <button class="small-btn" onclick="addGoal('yearly')">+</button>
-        </div>
-        <div id="yearly-goals-list" class="goals-list"></div>
-      </div>
-    </div>
-
-    <section class="sheet-panel" aria-label="Life sheet">
-      <div class="sheet-header">
-        <div class="sheet-toolbar">
-          <h3>Life sheet</h3>
-          <div class="sheet-actions">
-            <button class="small-btn" id="add-sheet-btn" type="button">+ Sheet</button>
-            <button class="small-btn" id="add-sheet-row" type="button">+ Row</button>
-            <button class="small-btn" id="add-sheet-col" type="button">+ Column</button>
-          </div>
-        </div>
-        <div class="sheet-tabs" id="sheet-tabs" aria-label="Sheet tabs"></div>
-      </div>
-      <div class="sheet-wrap">
-        <table class="sheet-table" id="life-sheet"></table>
-      </div>
-      <div class="sheet-color-palette" id="sheet-color-palette" role="dialog" aria-label="Sheet color palette">
-        <button type="button" class="palette-none" data-color-value="transparent">
-          <span class="none-icon">×</span>
-          <span>None</span>
-        </button>
-        <div class="palette-grid" id="sheet-palette-grid"></div>
-        <div class="palette-custom-label">CUSTOM</div>
-        <div class="palette-custom">
-          <button type="button" class="custom-color-add" data-sheet-custom-color-add aria-label="Choose custom color">+</button>
-          <input type="color" value="#ff0000" data-sheet-color-picker aria-label="Custom color picker">
-        </div>
-      </div>
-      <div class="sheet-footer">
-        <button class="small-btn danger" id="delete-sheet-btn" type="button">Delete</button>
-      </div>
-    </section>
-
-    <div class="calendar-container" id="calendar-container" style="display: none;">
-      <h1>Life Calendar</h1>
-      <p class="calendar-description">
-        Each square represents one week of your life. The darker squares show weeks that have passed.
-        <br>
-        <strong id="weeks-lived">0</strong> weeks lived out of <strong id="total-weeks">0</strong> weeks in a typical lifespan.
-      </p>
-
-      <div class="calendar-controls">
-        <label for="birthdate">Birth Date:</label>
-        <input type="date" id="birthdate" value="1990-01-01">
-        <label for="lifespan">Expected Lifespan (years):</label>
-        <input type="number" id="lifespan" value="80" min="1" max="120">
-        <button id="update-calendar" class="small-btn">Update</button>
-      </div>
-
-      <div class="calendar-grid" id="calendar-grid">
-        <!-- Calendar weeks will be generated here -->
-      </div>
-
-      <div class="calendar-stats">
-        <div class="stat-item">
-          <div class="stat-number" id="years-lived">0</div>
-          <div class="stat-label">Years Lived</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number" id="years-remaining">0</div>
-          <div class="stat-label">Years Remaining</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number" id="percentage-lived">0%</div>
-          <div class="stat-label">Life Completed</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="quote" id="quote" title="Click to copy quote">
-      "The trouble is, you think you have time." – Jack Kornfield
-    </div>
-  </main>
-
-    <div class="celebration-toast" id="celebration-toast" role="status" aria-live="polite">Goal archived</div>
-    <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
-
-  <!-- Custom dialog for adding goals -->
-  <dialog id="add-goal-dialog" class="goal-dialog">
-    <form method="dialog" id="add-goal-form">
-      <h3 id="dialog-title">Add New Goal</h3>
-      <label for="goal-text">Goal Description:</label>
-      <input type="text" id="goal-text" required placeholder="Enter your goal...">
-      <div class="dialog-buttons">
-        <button type="submit" class="dialog-btn primary">Add Goal</button>
-        <button type="button" class="dialog-btn secondary" onclick="closeGoalDialog()">Cancel</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="password-dialog" class="auth-password-dialog">
-    <form class="auth-form" id="password-form" novalidate>
-      <h2>Update password</h2>
-      <p class="auth-password-warning">Please save your password somewhere else too. This site does not offer password recovery.</p>
-      <label for="current-password">Current password</label>
-      <input id="current-password" type="password" autocomplete="current-password" required>
-      <label for="new-password">New password</label>
-      <input id="new-password" type="password" autocomplete="new-password" minlength="6" required>
-      <label for="confirm-password">Confirm new password</label>
-      <input id="confirm-password" type="password" autocomplete="new-password" minlength="6" required>
-      <p class="auth-error" id="password-error" role="alert"></p>
-      <button type="submit" class="auth-button auth-button-primary" id="password-submit">Update password</button>
-      <button type="button" class="auth-back-button" id="password-cancel">Cancel</button>
-    </form>
-  </dialog>
-
-  <dialog id="sticky-notes-dialog" class="goal-dialog sticky-notes-dialog">
-    <form method="dialog">
-      <h3>Sticky Notes <span class="sticky-notes-subtitle">Important reminders</span></h3>
-      <div class="sticky-add-row">
-        <input type="text" id="sticky-note-text" placeholder="Add an important task..." maxlength="200">
-        <button type="button" class="dialog-btn primary" id="sticky-add-btn">Add</button>
-      </div>
-      <div id="sticky-notes-list" class="sticky-notes-list"></div>
-      <div class="sticky-glow-toggle-row">
-        <span class="sticky-toggle-label">Glow reminder on header<span class="sticky-toggle-hint">Pulses while tasks are pending</span></span>
-        <label class="switch"><input type="checkbox" id="sticky-glow-toggle" checked aria-label="Enable glow reminder"><span class="switch-slider"></span></label>
-      </div>
-      <div class="dialog-buttons"><button type="button" class="dialog-btn secondary" id="sticky-notes-close">Close</button></div>
-    </form>
-  </dialog>
-  <div class="sticky-reminder-overlay" id="sticky-reminder-overlay" hidden>
-    <div class="sticky-reminder-modal" role="alertdialog" aria-modal="true" aria-labelledby="sticky-reminder-title">
-      <div class="sticky-reminder-icon"><i class="fa-solid fa-thumbtack"></i></div>
-      <h2 id="sticky-reminder-title">You have pending important tasks</h2>
-      <ul class="sticky-reminder-list" id="sticky-reminder-list"></ul>
-      <div class="sticky-reminder-actions"><button type="button" class="auth-button auth-button-primary" id="sticky-reminder-open">Open sticky notes</button><button type="button" class="auth-back-button" id="sticky-reminder-dismiss">Dismiss for now</button></div>
-    </div>
-  </div>
-
-  <div class="auth-overlay" id="auth-overlay" hidden>
-    <section class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-      <div class="auth-modal-heading">
-        <span class="auth-kicker">Life is Short</span>
-        <h1 id="auth-title">Make this time yours.</h1>
-        <p id="auth-description">Sign in to keep your progress with you, or continue locally as a guest.</p>
-      </div>
-
-      <!-- Step 1: choose -->
-      <div class="auth-choice-buttons" id="auth-choice-buttons">
-        <button type="button" class="auth-button auth-button-primary" data-auth-choice="signin">Sign In</button>
-        <button type="button" class="auth-button" data-auth-choice="signup">Sign Up</button>
-        <button type="button" class="auth-button auth-button-quiet" data-auth-choice="guest">Continue as Guest</button>
-      </div>
-
-      <!-- Step 2: sign in / sign up form -->
-      <form class="auth-form" id="auth-form" hidden novalidate>
-        <div class="auth-name-field" id="auth-name-field" hidden>
-          <label for="auth-name">Name (optional)</label>
-          <input id="auth-name" name="name" type="text" autocomplete="name" placeholder="What should we call you?">
-        </div>
-        <label for="auth-email">Email</label>
-        <input id="auth-email" name="email" type="email" autocomplete="email" required>
-        <label for="auth-password">Password</label>
-        <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="6" required>
-        <p class="auth-error" id="auth-error" role="alert"></p>
-        <button type="submit" class="auth-button auth-button-primary" id="auth-submit">Sign In</button>
-        <button type="button" class="auth-inline-toggle" id="auth-mode-toggle">
-          Don't have an account? <span>Sign up</span>
-        </button>
-        <button type="button" class="auth-back-button" id="auth-back">Back</button>
-      </form>
-
-      <!-- Step 3: guest-mode confirmation -->
-      <div class="auth-guest-confirm" id="auth-guest-confirm" hidden>
-        <div class="auth-guest-icon"><i class="fa-solid fa-hard-drive"></i></div>
-        <p class="auth-guest-message">
-          As a guest, your goals, notes, and calendar are saved only in <strong>this browser, on this device</strong>.
-          Come back here anytime and it'll all be waiting for you — but clearing your browser data or switching
-          devices means it won't come with you.
-        </p>
-        <div class="auth-guest-name-field">
-          <label for="auth-guest-name">Name (optional)</label>
-          <input id="auth-guest-name" type="text" autocomplete="name" placeholder="What should we call you?">
-        </div>
-        <button type="button" class="auth-button auth-button-primary" id="auth-guest-confirm-btn">Got it, continue as guest</button>
-        <button type="button" class="auth-button auth-button-quiet" id="auth-guest-signup-btn">Sign up instead</button>
-        <button type="button" class="auth-back-button" id="auth-guest-back">Back</button>
-      </div>
-
-      <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
-    </section>
-  </div>
-
   <script>
-    // Show current date/time
-    function setDateTime() {
-      const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                        hour: '2-digit', minute: '2-digit', second: '2-digit' };
-      document.getElementById('datetime').textContent = now.toLocaleString(undefined, options);
-    }
+    (() => {
+      const storageKey = 'life_notes';
+      const title = document.getElementById('note-title');
+      const body = document.getElementById('note-body');
+      const list = document.getElementById('note-list');
+      const count = document.getElementById('note-count');
+      const date = document.getElementById('note-date');
+      const state = document.getElementById('save-state');
+      let notes = loadNotes();
+      let activeId = notes[0]?.id || null;
 
-    // Calculate year progress
-    function getYearProgress() {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), 0, 1);
-      const end = new Date(now.getFullYear() + 1, 0, 1);
-      const percent = ((now - start) / (end - start)) * 100;
-      return percent;
-    }
-
-    // Calculate month progress
-    function getMonthProgress() {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      const percent = ((now - start) / (end - start)) * 100;
-      return percent;
-    }
-
-    // Calculate week progress (Monday is start of week)
-    function getWeekProgress() {
-      const now = new Date();
-      const day = now.getDay(); // 0 = Sunday
-      const daysSinceMonday = (day + 6) % 7;
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - daysSinceMonday);
-      monday.setHours(0,0,0,0);
-      const nextMonday = new Date(monday);
-      nextMonday.setDate(monday.getDate() + 7);
-      const percent = ((now - monday) / (nextMonday - monday)) * 100;
-      return percent;
-    }
-
-    function setProgress(animated = true) {
-      // Year
-      const yearPercent = getYearProgress();
-      document.getElementById('progress-label-year').textContent =
-        `Year is ${yearPercent.toFixed(2)}% complete`;
-      const yearBar = document.getElementById('progress-bar-year');
-      yearBar.setAttribute('data-tooltip', `${yearPercent.toFixed(2)}%`);
-      document.getElementById('progress-badge-year').textContent = `${yearPercent.toFixed(1)}%`;
-      if (animated) {
-        yearBar.style.width = '0';
-        setTimeout(() => { yearBar.style.width = yearPercent + '%'; }, 100);
-      } else {
-        yearBar.style.width = yearPercent + '%';
+      function loadNotes() {
+        try {
+          const value = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          return Array.isArray(value) ? value : [];
+        } catch (error) { return []; }
       }
 
-      // Month
-      const monthPercent = getMonthProgress();
-      document.getElementById('progress-label-month').textContent =
-        `Month is ${monthPercent.toFixed(2)}% complete`;
-      const monthBar = document.getElementById('progress-bar-month');
-      monthBar.setAttribute('data-tooltip', `${monthPercent.toFixed(2)}%`);
-      document.getElementById('progress-badge-month').textContent = `${monthPercent.toFixed(1)}%`;
-      if (animated) {
-        monthBar.style.width = '0';
-        setTimeout(() => { monthBar.style.width = monthPercent + '%'; }, 100);
-      } else {
-        monthBar.style.width = monthPercent + '%';
+      function activeNote() { return notes.find((note) => note.id === activeId); }
+
+      function saveNotes() {
+        localStorage.setItem(storageKey, JSON.stringify(notes));
+        state.textContent = 'Saved locally';
+        renderList();
       }
 
-      // Week
-      const weekPercent = getWeekProgress();
-      document.getElementById('progress-label-week').textContent =
-        `Week is ${weekPercent.toFixed(2)}% complete`;
-      const weekBar = document.getElementById('progress-bar-week');
-      weekBar.setAttribute('data-tooltip', `${weekPercent.toFixed(2)}%`);
-      document.getElementById('progress-badge-week').textContent = `${weekPercent.toFixed(1)}%`;
-      if (animated) {
-        weekBar.style.width = '0';
-        setTimeout(() => { weekBar.style.width = weekPercent + '%'; }, 100);
-      } else {
-        weekBar.style.width = weekPercent + '%';
-      }
-    }
-    // Calculate month progress
-    function getMonthProgress() {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      const percent = ((now - start) / (end - start)) * 100;
-      return percent;
-    }
-
-    // Calculate week progress (Monday is start of week)
-    function getWeekProgress() {
-      const now = new Date();
-      const day = now.getDay(); // 0 = Sunday
-      // Calculate days since Monday
-      const daysSinceMonday = (day + 6) % 7;
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - daysSinceMonday);
-      monday.setHours(0,0,0,0);
-      const nextMonday = new Date(monday);
-      nextMonday.setDate(monday.getDate() + 7);
-      const percent = ((now - monday) / (nextMonday - monday)) * 100;
-      return percent;
-    }
-
-    function setProgress() {
-      // Year
-      const yearPercent = getYearProgress();
-      document.getElementById('progress-label-year').textContent =
-        `Year is ${yearPercent.toFixed(2)}% complete`;
-      document.getElementById('progress-bar-year').style.width = yearPercent + '%';
-
-      // Month
-      const monthPercent = getMonthProgress();
-      document.getElementById('progress-label-month').textContent =
-        `Month is ${monthPercent.toFixed(2)}% complete`;
-      document.getElementById('progress-bar-month').style.width = monthPercent + '%';
-
-      // Week
-      const weekPercent = getWeekProgress();
-      document.getElementById('progress-label-week').textContent =
-        `Week is ${weekPercent.toFixed(2)}% complete`;
-      document.getElementById('progress-bar-week').style.width = weekPercent + '%';
-    }
-
-    setProgress();
-
-    // Motivational quotes (rotate daily)
-    const quotes = [
-      "The trouble is, you think you have time. – Jack Kornfield",
-      "Don't count the days, make the days count. – Muhammad Ali",
-      "Lost time is never found again. – Benjamin Franklin",
-      "Do not squander time, for that's the stuff life is made of. – Benjamin Franklin",
-      "You only live once, but if you do it right, once is enough. – Mae West"
-    ];
-    function setDailyQuote() {
-      const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-      const quote = quotes[dayOfYear % quotes.length];
-      const quoteEl = document.getElementById('quote');
-      quoteEl.textContent = quote;
-      quoteEl.classList.remove('copied');
-    }
-
-    // Reset all locally saved goals, preferences, and calendar data.
-    document.getElementById('refresh-btn').onclick = function() {
-      const shouldReset = confirm('This will erase all saved goals, calendar data, and preferences. Continue?');
-      if (shouldReset) {
-        localStorage.clear();
-        window.location.reload();
-      }
-    };
-
-    // Quote copy interaction
-    document.getElementById('quote').onclick = function() {
-      const quoteText = this.textContent;
-      navigator.clipboard.writeText(quoteText).then(() => {
-        this.classList.add('copied');
-        this.textContent = "Copied!";
-        setTimeout(() => {
-          setDailyQuote();
-        }, 900);
-      });
-    };
-
-    // Remove these blocks from your script section:
-
-    /* Remove this entire function
-    function updateRemaining() {
-      const now = new Date();
-      
-      // Year remaining
-      const yearEnd = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
-      const daysInYear = Math.ceil((yearEnd - now) / (1000 * 60 * 60 * 24));
-      document.getElementById('days-year').textContent = daysInYear;
-      
-      // Month remaining
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-      const daysInMonth = Math.ceil((monthEnd - now) / (1000 * 60 * 60 * 24));
-      document.getElementById('days-month').textContent = daysInMonth;
-      
-      // Week remaining (until Sunday)
-      const daysUntilSunday = 7 - now.getDay();
-      const weekEnd = new Date(now);
-      weekEnd.setDate(now.getDate() + daysUntilSunday);
-      weekEnd.setHours(23, 59, 59, 999);
-      const daysInWeek = Math.ceil((weekEnd - now) / (1000 * 60 * 60 * 24));
-      document.getElementById('days-week').textContent = daysInWeek;
-    }
-    */
-
-    /* Remove these lines from the initialization section
-    updateRemaining();
-    setInterval(updateRemaining, 60000);
-    */
-
-    // Add this function before initializeGoals()
-    function formatDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString(undefined, { 
-        month: 'short', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    const SHEET_STORAGE_KEY = 'life_sheet_data_v2';
-    const SHEET_ACTIVE_KEY = 'life_sheet_active_index';
-
-    const SHEET_PALETTE_COLORS = [
-      { value: '#000000', label: 'Black' },
-      { value: '#434343', label: 'Gray 1' },
-      { value: '#666666', label: 'Gray 2' },
-      { value: '#999999', label: 'Gray 3' },
-      { value: '#b7b7b7', label: 'Gray 4' },
-      { value: '#cccccc', label: 'Gray 5' },
-      { value: '#d9d9d9', label: 'Gray 6' },
-      { value: '#efefef', label: 'Gray 7' },
-      { value: '#f3f3f3', label: 'Gray 8' },
-      { value: '#ffffff', label: 'White' },
-      { value: '#980000', label: 'Red 1' },
-      { value: '#ff0000', label: 'Red 2' },
-      { value: '#ff9900', label: 'Orange' },
-      { value: '#ffff00', label: 'Yellow' },
-      { value: '#00ff00', label: 'Green 1' },
-      { value: '#00ffff', label: 'Cyan' },
-      { value: '#4a86e8', label: 'Blue 1' },
-      { value: '#0000ff', label: 'Blue 2' },
-      { value: '#9900ff', label: 'Purple' },
-      { value: '#ff00ff', label: 'Pink' },
-      { value: '#e6b8af', label: 'Rose' },
-      { value: '#f4cccc', label: 'Blush' },
-      { value: '#fce5cd', label: 'Peach' },
-      { value: '#fff2cc', label: 'Sand' },
-      { value: '#d9ead3', label: 'Mint' },
-      { value: '#d0e0e3', label: 'Mist' },
-      { value: '#c9daf8', label: 'Sky' },
-      { value: '#cfe2f3', label: 'Ice' },
-      { value: '#d9d2e9', label: 'Lavender' },
-      { value: '#ead1dc', label: 'Lilac' },
-      { value: '#dd7e6b', label: 'Coral' },
-      { value: '#ea9999', label: 'Warm Red' },
-      { value: '#f9cb9c', label: 'Apricot' },
-      { value: '#ffe599', label: 'Sun' },
-      { value: '#b6d7a8', label: 'Leaf' },
-      { value: '#a2c4c9', label: 'Sea' },
-      { value: '#a4c2f4', label: 'Azure' },
-      { value: '#9fc5e8', label: 'Cool Blue' },
-      { value: '#b4a7d6', label: 'Violet' },
-      { value: '#d5a6bd', label: 'Berry' },
-      { value: '#cc4125', label: 'Brick' },
-      { value: '#e06666', label: 'Tomato' },
-      { value: '#f6b26b', label: 'Amber' },
-      { value: '#ffd966', label: 'Gold' },
-      { value: '#93c47d', label: 'Olive' },
-      { value: '#76a5af', label: 'Teal' },
-      { value: '#6d9eeb', label: 'Royal' },
-      { value: '#6fa8dc', label: 'Aqua' },
-      { value: '#8e7cc3', label: 'Grape' },
-      { value: '#c27ba0', label: 'Plum' },
-      { value: '#a61c00', label: 'Crimson' },
-      { value: '#cc0000', label: 'Deep Red' },
-      { value: '#e69138', label: 'Burnt' },
-      { value: '#f1c232', label: 'Mustard' },
-      { value: '#6aa84f', label: 'Forest' },
-      { value: '#45818e', label: 'Deep Teal' },
-      { value: '#3c78d8', label: 'Indigo' },
-      { value: '#3d85c6', label: 'Ocean' },
-      { value: '#674ea7', label: 'Deep Purple' },
-      { value: '#a64d79', label: 'Magenta' },
-      { value: '#85200c', label: 'Maroon' },
-      { value: '#990000', label: 'Dark Red' },
-      { value: '#b45f06', label: 'Cinnamon' },
-      { value: '#bf9000', label: 'Gold Dark' },
-      { value: '#38761d', label: 'Deep Green' },
-      { value: '#134f5c', label: 'Navy Teal' },
-      { value: '#1155cc', label: 'Blue Stripe' },
-      { value: '#0b5394', label: 'Deep Blue' },
-      { value: '#351c75', label: 'Royal Purple' },
-      { value: '#741b47', label: 'Dark Rose' },
-      { value: '#5b0f00', label: 'Sienna' },
-      { value: '#660000', label: 'Mahogany' },
-      { value: '#783f04', label: 'Chestnut' },
-      { value: '#7f6000', label: 'Umber' },
-      { value: '#274e13', label: 'Green Dark' },
-      { value: '#0b3d45', label: 'Slate Teal' },
-      { value: '#1c4587', label: 'Steel Blue' },
-      { value: '#073763', label: 'Midnight' },
-      { value: '#20124d', label: 'Dark Violet' },
-      { value: '#4c1130', label: 'Plum Dark' }
-    ];
-
-    function createSheet(name, rows = 5, cols = 3) {
-      const data = Array.from({ length: rows }, () => Array.from({ length: cols }, () => ''));
-      return {
-        name,
-        data,
-        rowColors: Array.from({ length: rows }, () => ''),
-        colColors: Array.from({ length: cols }, () => ''),
-        cellColors: Array.from({ length: rows }, () => Array.from({ length: cols }, () => '')),
-        colorLabels: {}
-      };
-    }
-
-    function getDefaultSheets() {
-      return [
-        createSheet('Sheet 1', 5, 3),
-        createSheet('Sheet 2', 4, 3)
-      ];
-    }
-
-    function normalizeSheetData(data) {
-      if (!Array.isArray(data) || data.length === 0) {
-        return [['', '', '']];
-      }
-
-      return data.map((row) => {
-        const values = Array.isArray(row) ? row.slice() : [''];
-        while (values.length < 3) values.push('');
-        return values;
-      });
-    }
-
-    function normalizeSheetColorArray(values, length, fallback = '') {
-      if (!Array.isArray(values)) return Array.from({ length }, () => fallback);
-      const normalized = values.slice(0, length).map((value) => typeof value === 'string' ? value : fallback);
-      while (normalized.length < length) normalized.push(fallback);
-      return normalized;
-    }
-
-    function normalizeSheetColors(sheet, index) {
-      const rows = Math.max(normalizeSheetData(sheet && sheet.data).length, 1);
-      const cols = Math.max(normalizeSheetData(sheet && sheet.data)[0]?.length || 0, 3);
-      const colorLabels = {};
-      if (sheet && typeof sheet.colorLabels === 'object') {
-        Object.entries(sheet.colorLabels).forEach(([key, value]) => {
-          if (typeof value === 'string' && value.trim()) {
-            colorLabels[key] = value.trim();
-          }
-        });
-      }
-      const normalizedSheet = {
-        name: typeof sheet?.name === 'string' && sheet.name.trim() ? sheet.name.trim() : `Sheet ${index + 1}`,
-        data: normalizeSheetData(sheet && sheet.data),
-        rowColors: normalizeSheetColorArray(sheet && sheet.rowColors, rows),
-        colColors: normalizeSheetColorArray(sheet && sheet.colColors, cols),
-        cellColors: Array.from({ length: rows }, (_, rowIndex) => {
-          const rowArray = Array.isArray(sheet && sheet.cellColors && sheet.cellColors[rowIndex]) ? sheet.cellColors[rowIndex] : [];
-          return normalizeSheetColorArray(rowArray, cols);
-        }),
-        colorLabels
-      };
-      while (normalizedSheet.cellColors.length < rows) normalizedSheet.cellColors.push(Array.from({ length: cols }, () => ''));
-      return normalizedSheet;
-    }
-
-    function loadSheets() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(SHEET_STORAGE_KEY) || 'null');
-        if (Array.isArray(saved) && saved.length) {
-          return saved.map((sheet, index) => normalizeSheetColors(sheet, index));
+      function renderList() {
+        count.textContent = notes.length;
+        list.replaceChildren();
+        if (!notes.length) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-list';
+          empty.textContent = 'Your notes will appear here.';
+          list.appendChild(empty);
+          return;
         }
-      } catch (error) {
-        console.warn('Unable to load life sheets', error);
-      }
-      return getDefaultSheets();
-    }
-
-    function saveSheets(sheets) {
-      localStorage.setItem(SHEET_STORAGE_KEY, JSON.stringify(sheets));
-    }
-
-    function getActiveSheetIndex() {
-      const savedIndex = Number(localStorage.getItem(SHEET_ACTIVE_KEY));
-      const sheets = loadSheets();
-      if (!Number.isInteger(savedIndex) || savedIndex < 0 || savedIndex >= sheets.length) {
-        return 0;
-      }
-      return savedIndex;
-    }
-
-    function setActiveSheetIndex(index) {
-      const sheets = loadSheets();
-      if (index < 0 || index >= sheets.length) return;
-      localStorage.setItem(SHEET_ACTIVE_KEY, String(index));
-    }
-
-    function activeSheet() {
-      const sheets = loadSheets();
-      const index = getActiveSheetIndex();
-      return sheets[index] || sheets[0];
-    }
-
-    function renderSheetTabs() {
-      const container = document.getElementById('sheet-tabs');
-      if (!container) return;
-
-      const sheets = loadSheets();
-      const activeIndex = getActiveSheetIndex();
-      container.innerHTML = '';
-
-      sheets.forEach((sheet, index) => {
-        const tab = document.createElement('button');
-        tab.type = 'button';
-        tab.className = `sheet-tab ${index === activeIndex ? 'active' : ''}`;
-        tab.innerHTML = `${sheet.name} <span class="sheet-tab-rename" data-rename-index="${index}" title="Rename sheet"><i class="fa-solid fa-pen"></i></span>`;
-        tab.addEventListener('click', (event) => {
-          const renameButton = event.target.closest('[data-rename-index]');
-          if (renameButton) {
-            const nextName = window.prompt('Rename sheet', sheet.name);
-            if (nextName && nextName.trim()) {
-              sheet.name = nextName.trim();
-              saveSheets(sheets);
-              renderSheetTabs();
-              renderSheet();
-            }
-            return;
-          }
-          setActiveSheetIndex(index);
-          renderSheetTabs();
-          renderSheet();
+        notes.forEach((note) => {
+          const item = document.createElement('button');
+          item.className = `note-item${note.id === activeId ? ' active' : ''}`;
+          item.type = 'button';
+          const heading = document.createElement('strong');
+          heading.textContent = note.title || 'Untitled note';
+          const preview = document.createElement('span');
+          preview.textContent = note.body.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || 'Empty note';
+          item.append(heading, preview);
+          item.addEventListener('click', () => openNote(note.id));
+          list.appendChild(item);
         });
-        container.appendChild(tab);
+      }
+
+      function openNote(id) {
+        activeId = id;
+        const note = activeNote();
+        if (!note) return;
+        title.value = note.title || '';
+        body.innerHTML = note.body || '';
+        date.textContent = `Last edited ${new Date(note.updatedAt).toLocaleString()}`;
+        renderList();
+      }
+
+      function createNote() {
+        const now = new Date().toISOString();
+        const note = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, title: '', body: '', updatedAt: now };
+        notes.unshift(note);
+        activeId = note.id;
+        saveNotes();
+        openNote(note.id);
+        title.focus();
+      }
+
+      function updateNote() {
+        const note = activeNote();
+        if (!note) return;
+        note.title = title.value;
+        note.body = body.innerHTML;
+        note.updatedAt = new Date().toISOString();
+        date.textContent = `Last edited ${new Date(note.updatedAt).toLocaleString()}`;
+        saveNotes();
+      }
+
+      document.getElementById('new-note').addEventListener('click', createNote);
+      document.getElementById('delete-note').addEventListener('click', () => {
+        if (!activeNote() || !window.confirm('Delete this note?')) return;
+        notes = notes.filter((note) => note.id !== activeId);
+        activeId = notes[0]?.id || null;
+        saveNotes();
+        if (activeId) openNote(activeId); else { title.value = ''; body.innerHTML = ''; date.textContent = ''; }
       });
-    }
-
-    function addSheet() {
-      const sheets = loadSheets();
-      const newIndex = sheets.length + 1;
-      sheets.push(createSheet(`Sheet ${newIndex}`));
-      saveSheets(sheets);
-      setActiveSheetIndex(sheets.length - 1);
-      renderSheetTabs();
-      renderSheet();
-    }
-
-    function deleteSheet() {
-      const sheets = loadSheets();
-      const activeIndex = getActiveSheetIndex();
-      const targetName = sheets[activeIndex]?.name || 'current sheet';
-      if (!confirm(`Delete "${targetName}"?`)) {
-        return;
-      }
-
-      if (sheets.length <= 1) {
-        saveSheets([createSheet('Sheet 1')]);
-        setActiveSheetIndex(0);
-      } else {
-        sheets.splice(activeIndex, 1);
-        saveSheets(sheets);
-        setActiveSheetIndex(Math.max(0, activeIndex - 1));
-      }
-      renderSheetTabs();
-      renderSheet();
-    }
-
-    function hexToRgb(hex) {
-      const normalized = hex.replace('#', '');
-      const full = normalized.length === 3 ? normalized.split('').map((char) => char + char).join('') : normalized;
-      const safe = full.length === 6 ? full : 'ffffff';
-      const int = Number.parseInt(safe, 16);
-      return {
-        r: (int >> 16) & 255,
-        g: (int >> 8) & 255,
-        b: int & 255
-      };
-    }
-
-    function getReadableTextColor(backgroundColor) {
-      if (!backgroundColor || backgroundColor === 'transparent') return '#111827';
-      const { r, g, b } = hexToRgb(backgroundColor);
-      const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-      return luminance > 0.64 ? '#111827' : '#ffffff';
-    }
-
-    // Explicit color precedence for overlapping styles:
-    // cell color > row color > column color > no color.
-    // This merge is applied consistently in renderSheet() and in getSheetEffectiveCellColor().
-    function getSheetEffectiveCellColor(sheet, rowIndex, colIndex) {
-      if (!sheet) return '';
-      const cellColor = sheet.cellColors?.[rowIndex]?.[colIndex];
-      if (cellColor) return cellColor;
-      const rowColor = sheet.rowColors?.[rowIndex];
-      if (rowColor) return rowColor;
-      return sheet.colColors?.[colIndex] || '';
-    }
-
-    function getSheetResolvedStyle(sheet, rowIndex, colIndex) {
-      const backgroundColor = getSheetEffectiveCellColor(sheet, rowIndex, colIndex);
-      return {
-        backgroundColor: backgroundColor || '',
-        color: backgroundColor ? getReadableTextColor(backgroundColor) : '#111827'
-      };
-    }
-
-    function setSheetTargetColor(targetType, rowIndex, colIndex, colorValue, colorLabel) {
-      const sheets = loadSheets();
-      const activeIndex = getActiveSheetIndex();
-      const sheet = sheets[activeIndex] || sheets[0];
-      if (!sheet) return;
-
-      if (!sheet.colorLabels || typeof sheet.colorLabels !== 'object') {
-        sheet.colorLabels = {};
-      }
-
-      if (targetType === 'row') {
-        if (!Array.isArray(sheet.rowColors)) sheet.rowColors = [];
-        sheet.rowColors[rowIndex] = colorValue === 'transparent' ? '' : colorValue;
-      }
-
-      if (targetType === 'col') {
-        if (!Array.isArray(sheet.colColors)) sheet.colColors = [];
-        sheet.colColors[colIndex] = colorValue === 'transparent' ? '' : colorValue;
-      }
-
-      if (targetType === 'cell') {
-        if (!Array.isArray(sheet.cellColors)) sheet.cellColors = [];
-        if (!Array.isArray(sheet.cellColors[rowIndex])) sheet.cellColors[rowIndex] = [];
-        sheet.cellColors[rowIndex][colIndex] = colorValue === 'transparent' ? '' : colorValue;
-      }
-
-      if (colorValue && colorValue !== 'transparent') {
-        const label = typeof colorLabel === 'string' && colorLabel.trim() ? colorLabel.trim() : (SHEET_PALETTE_COLORS.find((entry) => entry.value === colorValue)?.label || 'Custom');
-        sheet.colorLabels[colorValue] = label;
-      }
-
-      saveSheets(sheets);
-      renderSheet();
-    }
-
-    function buildSheetColorPalette() {
-      const paletteGrid = document.getElementById('sheet-palette-grid');
-      if (!paletteGrid) return;
-
-      paletteGrid.innerHTML = '';
-      SHEET_PALETTE_COLORS.forEach(({ value, label }) => {
-        const swatch = document.createElement('button');
-        swatch.type = 'button';
-        swatch.className = 'palette-swatch' + (value === '#ffffff' ? ' white' : '');
-        swatch.style.backgroundColor = value;
-        swatch.dataset.colorValue = value;
-        swatch.dataset.colorLabel = label;
-        swatch.title = `${label} (${value})`;
-        swatch.setAttribute('aria-label', `Cell color ${label}`);
-
-        const colorLabel = document.createElement('span');
-        colorLabel.className = 'palette-swatch-label';
-        colorLabel.textContent = label;
-
-        swatch.appendChild(colorLabel);
-        paletteGrid.appendChild(swatch);
-      });
-    }
-
-    function closeSheetColorPalette() {
-      const palette = document.getElementById('sheet-color-palette');
-      if (palette) palette.classList.remove('open');
-    }
-
-    let activeSheetColorTarget = { type: null, rowIndex: null, colIndex: null };
-
-    function openSheetColorPalette(target) {
-      const palette = document.getElementById('sheet-color-palette');
-      if (!palette || !target) return;
-
-      activeSheetColorTarget = {
-        type: target.dataset.sheetColorTarget || 'cell',
-        rowIndex: Number(target.dataset.sheetRowIndex ?? -1),
-        colIndex: Number(target.dataset.sheetColIndex ?? -1)
-      };
-
-      const rect = target.getBoundingClientRect();
-      const margin = 16;
-
-      // Make the palette visible-but-invisible first so we can measure its
-      // REAL rendered size. Measuring while it's still display:none (the old
-      // code did this) always returns 0, so it fell back to a guessed
-      // 360x250 box — if the real palette was taller than that guess, the
-      // position math was wrong and the palette got placed partly off the
-      // bottom/edge of the page, making it look cut in half.
-      palette.style.visibility = 'hidden';
-      palette.classList.add('open');
-
-      const paletteWidth = palette.offsetWidth || 360;
-      const paletteHeight = palette.offsetHeight || 250;
-
-      let nextTop = rect.bottom + 12;
-      let nextLeft = rect.left - 6;
-
-      if (nextTop + paletteHeight > window.innerHeight - margin) {
-        nextTop = rect.top - paletteHeight - 12;
-      }
-
-      if (nextLeft + paletteWidth > window.innerWidth - margin) {
-        nextLeft = Math.max(margin, window.innerWidth - paletteWidth - margin);
-      }
-
-      nextTop = Math.max(margin, Math.min(nextTop, window.innerHeight - paletteHeight - margin));
-      nextLeft = Math.max(margin, Math.min(nextLeft, window.innerWidth - paletteWidth - margin));
-
-      palette.style.top = `${nextTop}px`;
-      palette.style.left = `${nextLeft}px`;
-      palette.style.visibility = '';
-
-      const paletteRect = palette.getBoundingClientRect();
-      if (paletteRect.bottom > window.innerHeight - margin || paletteRect.top < margin) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }
-
-    function applySheetColor(colorValue, colorLabel) {
-      if (!activeSheetColorTarget.type) return;
-
-      const { type, rowIndex, colIndex } = activeSheetColorTarget;
-      const effectiveLabel = typeof colorLabel === 'string' && colorLabel.trim() ? colorLabel.trim() : (SHEET_PALETTE_COLORS.find((entry) => entry.value === colorValue)?.label || 'Custom');
-
-      if (type === 'row' && rowIndex >= 0) {
-        setSheetTargetColor('row', rowIndex, 0, colorValue, effectiveLabel);
-      } else if (type === 'col' && colIndex >= 0) {
-        setSheetTargetColor('col', 0, colIndex, colorValue, effectiveLabel);
-      } else if (type === 'cell' && rowIndex >= 0 && colIndex >= 0) {
-        setSheetTargetColor('cell', rowIndex, colIndex, colorValue, effectiveLabel);
-      }
-
-      closeSheetColorPalette();
-    }
-
-    function renderSheet() {
-      const table = document.getElementById('life-sheet');
-      if (!table) return;
-
-      const sheets = loadSheets();
-      const activeIndex = getActiveSheetIndex();
-      const sheet = sheets[activeIndex] || sheets[0];
-      if (!sheet) return;
-
-      const data = normalizeSheetData(sheet.data);
-      const columnCount = Math.max(...data.map(row => row.length), 1);
-      const headerLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
-      const columnLabels = headerLabels.slice(0, columnCount);
-
-      table.innerHTML = '';
-
-      const thead = document.createElement('thead');
-      const headerRow = document.createElement('tr');
-
-      const rowHeaderCell = document.createElement('th');
-      rowHeaderCell.textContent = '';
-      headerRow.appendChild(rowHeaderCell);
-
-      columnLabels.forEach((label, index) => {
-        const th = document.createElement('th');
-        th.setAttribute('scope', 'col');
-        th.dataset.colIndex = String(index);
-        const columnBackground = sheet.colColors?.[index] || '';
-        const columnStyle = columnBackground ? {
-          backgroundColor: columnBackground,
-          color: getReadableTextColor(columnBackground)
-        } : {};
-        Object.assign(th.style, columnStyle);
-        th.innerHTML = `
-          <div class="sheet-header-label">
-            <button class="sheet-color-btn" type="button" data-sheet-color-target="col" data-sheet-col-index="${index}" title="Colour column" aria-label="Colour column"></button>
-            <span>${label}</span>
-            <button class="sheet-header-action" type="button" data-remove-col="${index}" title="Delete column">×</button>
-          </div>
-        `;
-        headerRow.appendChild(th);
-      });
-
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      data.forEach((row, rowIndex) => {
-        const tr = document.createElement('tr');
-        const rowLabel = document.createElement('th');
-        rowLabel.setAttribute('scope', 'row');
-        const rowBackground = sheet.rowColors?.[rowIndex] || '';
-        const rowStyle = rowBackground ? {
-          backgroundColor: rowBackground,
-          color: getReadableTextColor(rowBackground)
-        } : {};
-        Object.assign(rowLabel.style, rowStyle);
-        rowLabel.innerHTML = `
-          <div class="sheet-row-label">
-            <span>${rowIndex + 1}</span>
-            <button class="sheet-color-btn" type="button" data-sheet-color-target="row" data-sheet-row-index="${rowIndex}" title="Colour row" aria-label="Colour row"></button>
-            <button class="sheet-row-delete" type="button" data-remove-row="${rowIndex}" title="Delete row">×</button>
-          </div>
-        `;
-        tr.appendChild(rowLabel);
-
-        row.forEach((cellValue, colIndex) => {
-          const td = document.createElement('td');
-          const resolvedStyle = getSheetResolvedStyle(sheet, rowIndex, colIndex);
-          if (resolvedStyle.backgroundColor) {
-            td.style.backgroundColor = resolvedStyle.backgroundColor;
-            td.style.color = resolvedStyle.color;
-          }
-
-          const cellWrapper = document.createElement('div');
-          cellWrapper.className = 'sheet-cell-wrap';
-          if (resolvedStyle.backgroundColor) {
-            cellWrapper.style.backgroundColor = resolvedStyle.backgroundColor;
-            cellWrapper.style.color = resolvedStyle.color;
-          }
-
-          const colorButton = document.createElement('button');
-          colorButton.type = 'button';
-          colorButton.className = 'sheet-cell-color';
-          colorButton.dataset.sheetColorTarget = 'cell';
-          colorButton.dataset.sheetRowIndex = String(rowIndex);
-          colorButton.dataset.sheetColIndex = String(colIndex);
-          colorButton.title = 'Colour cell';
-          colorButton.setAttribute('aria-label', `Colour cell ${rowIndex + 1}, ${String.fromCharCode(65 + colIndex)}`);
-
-          const cell = document.createElement('div');
-          cell.className = 'sheet-cell';
-          cell.contentEditable = 'true';
-          cell.dataset.rowIndex = String(rowIndex);
-          cell.dataset.colIndex = String(colIndex);
-          cell.textContent = cellValue || '';
-          if (resolvedStyle.backgroundColor) {
-            cell.style.color = resolvedStyle.color;
-            cell.style.backgroundColor = resolvedStyle.backgroundColor;
-          }
-
-          cellWrapper.appendChild(colorButton);
-          cellWrapper.appendChild(cell);
-          td.appendChild(cellWrapper);
-          tr.appendChild(td);
-        });
-
-        tbody.appendChild(tr);
-      });
-
-      table.appendChild(tbody);
-
-      document.querySelectorAll('[data-sheet-color-target]').forEach((button) => {
-        button.addEventListener('click', (event) => {
-          event.stopPropagation();
-          openSheetColorPalette(event.currentTarget);
-        });
-      });
-
-      document.querySelectorAll('[data-remove-row]').forEach((button) => {
-        button.addEventListener('click', (event) => {
-          event.stopPropagation();
-          const rowIndex = Number(event.currentTarget.dataset.removeRow);
-          if (!window.confirm(`Delete row ${rowIndex + 1}?`)) {
-            return;
-          }
-          deleteSheetRow(rowIndex);
-        });
-      });
-
-      document.querySelectorAll('[data-remove-col]').forEach((button) => {
-        button.addEventListener('click', (event) => {
-          event.stopPropagation();
-          const colIndex = Number(event.currentTarget.dataset.removeCol);
-          if (!window.confirm(`Delete column ${String.fromCharCode(65 + colIndex)}?`)) {
-            return;
-          }
-          deleteSheetColumn(colIndex);
-        });
-      });
-    }
-
-    function updateSheetCell(rowIndex, colIndex, value) {
-      const sheets = loadSheets();
-      const activeIndex = getActiveSheetIndex();
-      const sheet = sheets[activeIndex] || sheets[0];
-      if (!sheet || !sheet.data[rowIndex]) return;
-      while (sheet.data[rowIndex].length <= colIndex) sheet.data[rowIndex].push('');
-      sheet.data[rowIndex][colIndex] = value;
-      saveSheets(sheets);
-    }
-
-    function addSheetRow() {
-      const sheets = loadSheets();
-      const activeIndex = getActiveSheetIndex();
-      const sheet = sheets[activeIndex] || sheets[0];
-      if (!sheet) return;
-      const columnCount = Math.max(...sheet.data.map(row => row.length), 1);
-      sheet.data.push(Array(columnCount).fill(''));
-      sheet.rowColors.push('');
-      sheet.cellColors.push(Array(columnCount).fill(''));
-      saveSheets(sheets);
-      renderSheet();
-    }
-
-    function deleteSheetRow(rowIndex) {
-      const sheets = loadSheets();
-      const activeIndex = getActiveSheetIndex();
-      const sheet = sheets[activeIndex] || sheets[0];
-      if (!sheet || sheet.data.length <= 1) return;
-      sheet.data.splice(rowIndex, 1);
-      if (Array.isArray(sheet.rowColors)) sheet.rowColors.splice(rowIndex, 1);
-      if (Array.isArray(sheet.cellColors)) sheet.cellColors.splice(rowIndex, 1);
-      saveSheets(sheets);
-      renderSheet();
-    }
-
-    function addSheetColumn() {
-      const sheets = loadSheets();
-      const activeIndex = getActiveSheetIndex();
-      const sheet = sheets[activeIndex] || sheets[0];
-      if (!sheet) return;
-      sheet.data.forEach(row => row.push(''));
-      sheet.colColors.push('');
-      sheet.cellColors = sheet.cellColors.map((rowColors) => [...rowColors, '']);
-      saveSheets(sheets);
-      renderSheet();
-    }
-
-    function deleteSheetColumn(colIndex) {
-      const sheets = loadSheets();
-      const activeIndex = getActiveSheetIndex();
-      const sheet = sheets[activeIndex] || sheets[0];
-      if (!sheet || sheet.data[0].length <= 1) return;
-      sheet.data = sheet.data.map(row => row.filter((_, index) => index !== colIndex));
-      if (Array.isArray(sheet.colColors)) sheet.colColors.splice(colIndex, 1);
-      if (Array.isArray(sheet.cellColors)) {
-        sheet.cellColors = sheet.cellColors.map((rowColors) => rowColors.filter((_, index) => index !== colIndex));
-      }
-      saveSheets(sheets);
-      renderSheet();
-    }
-
-    document.addEventListener('input', function (event) {
-      const target = event.target;
-      if (!(target instanceof HTMLElement) || !target.classList.contains('sheet-cell')) return;
-      const rowIndex = Number(target.dataset.rowIndex);
-      const colIndex = Number(target.dataset.colIndex);
-      if (Number.isInteger(rowIndex) && Number.isInteger(colIndex)) {
-        updateSheetCell(rowIndex, colIndex, target.textContent || '');
-      }
-    });
-
-    buildSheetColorPalette();
-
-    document.getElementById('sheet-color-palette').addEventListener('click', (event) => {
-      const swatch = event.target.closest('[data-color-value]');
-      if (swatch) {
-        applySheetColor(swatch.dataset.colorValue, swatch.dataset.colorLabel || 'Custom');
-      }
-    });
-
-    document.getElementById('sheet-color-palette').querySelector('[data-sheet-custom-color-add]').addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const picker = document.querySelector('[data-sheet-color-picker]');
-      if (picker) picker.click();
-    });
-
-    document.querySelector('[data-sheet-color-picker]').addEventListener('input', (event) => {
-      const colorValue = event.target.value;
-      const label = window.prompt('Name this color (optional)', 'Custom');
-      applySheetColor(colorValue, label && label.trim() ? label.trim() : 'Custom');
-    });
-
-    document.addEventListener('click', (event) => {
-      const palette = document.getElementById('sheet-color-palette');
-      if (!palette) return;
-      if (!palette.contains(event.target) && !event.target.closest('[data-sheet-color-target]')) {
-        closeSheetColorPalette();
-      }
-    });
-
-    document.getElementById('add-sheet-btn').addEventListener('click', addSheet);
-    document.getElementById('delete-sheet-btn').addEventListener('click', deleteSheet);
-    document.getElementById('add-sheet-row').addEventListener('click', addSheetRow);
-    document.getElementById('add-sheet-col').addEventListener('click', addSheetColumn);
-
-    const pageScrollIndicator = document.querySelector('.page-scroll-indicator');
-    const pageScrollThumb = document.querySelector('.page-scroll-thumb');
-    if (pageScrollIndicator && pageScrollThumb) {
-      const updatePageScrollIndicator = () => {
-        const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const scrollRatio = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
-        const trackHeight = pageScrollIndicator.querySelector('.page-scroll-track').clientHeight;
-        const thumbHeight = pageScrollThumb.offsetHeight;
-        pageScrollThumb.style.transform = `translateY(${Math.min(scrollRatio * (trackHeight - thumbHeight), trackHeight - thumbHeight)}px)`;
-        pageScrollIndicator.classList.toggle('visible', scrollableHeight > 0);
-      };
-      window.addEventListener('scroll', updatePageScrollIndicator, { passive: true });
-      window.addEventListener('resize', updatePageScrollIndicator);
-      updatePageScrollIndicator();
-    }
-
-    // Goals management
-    let goals = [];
-    let currentGoalType = '';
-    let currentGoalId = null;
-
-    function loadGoals() {
-      goals = JSON.parse(localStorage.getItem('goals') || '[]');
-      renderAllGoals();
-    }
-
-    function saveGoals() {
-      localStorage.setItem('goals', JSON.stringify(goals));
-    }
-
-    function renderAllGoals() {
-      const goalsByType = { daily: [], weekly: [], monthly: [], yearly: [] };
-      goals.forEach(goal => {
-        if (goalsByType[goal.goal_type]) {
-          goalsByType[goal.goal_type].push(goal);
-        }
-      });
-      Object.keys(goalsByType).forEach(type => {
-        renderGoalsList(type, goalsByType[type]);
-      });
-    }
-
-    function initThemeToggle() {
-      const toggle = document.getElementById('theme-toggle');
-      const savedTheme = localStorage.getItem('theme') || 'dark';
-
-      function applyTheme(theme) {
-        const isDark = theme === 'dark';
-        document.documentElement.dataset.theme = theme;
-        toggle.setAttribute('aria-pressed', isDark);
-        toggle.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-        toggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-        toggle.innerHTML = `<i class="fa-solid fa-${isDark ? 'sun' : 'moon'}"></i>`;
-      }
-
-      applyTheme(savedTheme);
-      toggle.addEventListener('click', () => {
-        const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('theme', nextTheme);
-        applyTheme(nextTheme);
-      });
-    }
-
-    function addGoal(type) {
-      currentGoalType = type;
-      currentGoalId = null;
-      document.getElementById('dialog-title').textContent = `Add New ${type.charAt(0).toUpperCase() + type.slice(1)} Goal`;
-      document.getElementById('goal-text').value = '';
-      document.querySelector('#add-goal-form .primary').textContent = 'Add Goal';
-      document.getElementById('add-goal-dialog').showModal();
-    }
-
-    function createGoal(text, type) {
-      const newGoal = {
-        id: Date.now(),
-        text: text,
-        goal_type: type,
-        done: false,
-        created: new Date().toISOString()
-      };
-      goals.push(newGoal);
-      saveGoals();
-      loadGoals();
-    }
-
-    function editGoal(id) {
-      const goal = goals.find(item => item.id === id);
-      if (!goal) return;
-
-      currentGoalId = id;
-      currentGoalType = goal.goal_type;
-      document.getElementById('dialog-title').textContent = 'Edit Goal';
-      document.getElementById('goal-text').value = goal.text;
-      document.querySelector('#add-goal-form .primary').textContent = 'Save Changes';
-      document.getElementById('add-goal-dialog').showModal();
-    }
-
-    function moveGoal(id, direction) {
-      const goalIndex = goals.findIndex(goal => goal.id === id);
-      const goal = goals[goalIndex];
-      if (!goal) return;
-
-      const sameTypeIndexes = goals
-        .map((item, index) => item.goal_type === goal.goal_type ? index : -1)
-        .filter(index => index !== -1);
-      const position = sameTypeIndexes.indexOf(goalIndex);
-      const targetPosition = position + direction;
-      if (targetPosition < 0 || targetPosition >= sameTypeIndexes.length) return;
-
-      const targetIndex = sameTypeIndexes[targetPosition];
-      [goals[goalIndex], goals[targetIndex]] = [goals[targetIndex], goals[goalIndex]];
-      saveGoals();
-      loadGoals();
-    }
-
-    function renderGoalsList(type, goals) {
-      const list = document.getElementById(`${type}-goals-list`);
-
-      list.innerHTML = goals.map((goal, index) => `
-        <div class="goal-item ${goal.done ? 'completed' : ''}" data-id="${goal.id}">
-          <span class="goal-number">${index + 1}</span>
-          <input type="checkbox" class="goal-checkbox"
-            ${goal.done ? 'checked' : ''}
-            onchange="toggleGoal(${goal.id})">
-          <span class="goal-text">${goal.text}</span>
-          <span class="goal-date">${formatDate(goal.created)}</span>
-          <div class="goal-actions">
-            <button class="goal-btn move-btn" title="Move goal up" aria-label="Move goal up" onclick="moveGoal(${goal.id}, -1)" ${index === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
-            <button class="goal-btn move-btn" title="Move goal down" aria-label="Move goal down" onclick="moveGoal(${goal.id}, 1)" ${index === goals.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
-            <button class="goal-btn" title="Edit goal" aria-label="Edit goal" onclick="editGoal(${goal.id})"><i class="fa-solid fa-pen"></i></button>
-            <button class="goal-btn" title="Delete goal" aria-label="Delete goal" onclick="deleteGoal(${goal.id})">×</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function toggleGoal(id) {
-      const goal = goals.find(g => g.id === id);
-      if (goal) {
-        goal.done = !goal.done;
-        saveGoals();
-        loadGoals();
-        if (goal.done) celebrateGoal();
-      }
-    }
-
-    function celebrateGoal() {
-      const toast = document.getElementById('celebration-toast');
-      const confettiLayer = document.getElementById('confetti-layer');
-      toast.classList.remove('visible');
-      confettiLayer.innerHTML = '';
-      void toast.offsetWidth;
-      toast.classList.add('visible');
-
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        const colors = ['#6366f1', '#06b6d4', '#f59e0b', '#10b981', '#ef4444'];
-        for (let index = 0; index < 72; index++) {
-          const piece = document.createElement('span');
-          const origin = index % 3;
-          const fromTop = origin === 2;
-          piece.className = `confetti-piece ${fromTop ? 'from-top' : 'from-corner'}`;
-          piece.style.setProperty('--confetti-color', colors[index % colors.length]);
-          piece.style.setProperty('--confetti-x', fromTop
-            ? `${Math.random() * 96 + 2}vw`
-            : `${origin === 0 ? Math.random() * 18 + 2 : Math.random() * 18 + 80}vw`);
-          piece.style.setProperty('--confetti-y', fromTop
-            ? `${Math.random() * 8 + 1}vh`
-            : `${Math.random() * 8 + 88}vh`);
-          piece.style.setProperty('--confetti-drift-x', fromTop
-            ? `${(Math.random() - 0.5) * 35}vw`
-            : `${origin === 0 ? Math.random() * 55 + 10 : -(Math.random() * 55 + 10)}vw`);
-          piece.style.setProperty('--confetti-drift-y', fromTop ? '72vh' : '-58vh');
-          piece.style.setProperty('--confetti-delay', `${Math.random() * 320}ms`);
-          piece.style.setProperty('--confetti-rotation', `${Math.random() * 360}deg`);
-          confettiLayer.appendChild(piece);
-        }
-      }
-
-      setTimeout(() => {
-        toast.classList.remove('visible');
-        confettiLayer.innerHTML = '';
-      }, 1800);
-    }
-
-    function deleteGoal(id) {
-      if (confirm('Delete this goal?')) {
-        goals = goals.filter(g => g.id !== id);
-        saveGoals();
-        loadGoals();
-      }
-    }
-
-    // Sidebar toggle functionality
-    function initSidebarToggle() {
-      const sidebar = document.querySelector('.sidebar');
-      const toggleBtn = document.getElementById('sidebar-toggle');
-      const main = document.querySelector('main');
-
-      // Sidebar always starts collapsed on every load; it no longer
-      // remembers or restores a previously expanded state.
-      toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('expanded');
-        main.classList.toggle('expanded');
-      });
-    }
-
-    // Goal dialog functionality
-    function closeGoalDialog() {
-      document.getElementById('add-goal-dialog').close();
-    }
-
-    document.getElementById('add-goal-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const goalText = document.getElementById('goal-text').value.trim();
-      if (goalText) {
-        if (currentGoalId === null) {
-          createGoal(goalText, currentGoalType);
-        } else {
-          const goal = goals.find(item => item.id === currentGoalId);
-          if (goal) goal.text = goalText;
-          saveGoals();
-          loadGoals();
-        }
-        closeGoalDialog();
-      }
-    });
-
-    // Calendar functionality
-    function toggleCalendar() {
-      const calendar = document.getElementById('calendar-container');
-      const isVisible = calendar.style.display !== 'none';
-      calendar.style.display = isVisible ? 'none' : 'block';
-      if (!isVisible) {
-        // Initialize calendar if showing
-        const birthdate = document.getElementById('birthdate').value;
-        const lifespan = parseInt(document.getElementById('lifespan').value);
-        generateCalendar(birthdate, lifespan);
-      }
-    }
-
-    function generateCalendar(birthDate, lifespanYears) {
-      const grid = document.getElementById('calendar-grid');
-      const now = new Date();
-      const birth = new Date(birthDate);
-
-      // Clear existing grid
-      grid.innerHTML = '';
-
-      let totalWeeksLived = 0;
-
-      // Create rows for each year of life
-      for (let year = 0; year < lifespanYears; year++) {
-        const yearStart = new Date(birth);
-        yearStart.setFullYear(birth.getFullYear() + year);
-
-        const yearEnd = new Date(birth);
-        yearEnd.setFullYear(birth.getFullYear() + year + 1);
-
-        // Calculate weeks in this year
-        const weeksInYear = Math.round((yearEnd - yearStart) / (1000 * 60 * 60 * 24 * 7));
-
-        // Create year container
-        const yearContainer = document.createElement('div');
-        yearContainer.className = 'calendar-year';
-
-        // Create week elements for this year
-        for (let week = 0; week < weeksInYear; week++) {
-          const weekStart = new Date(yearStart);
-          weekStart.setDate(yearStart.getDate() + (week * 7));
-
-          const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekStart.getDate() + 7);
-
-          const weekElement = document.createElement('div');
-          weekElement.className = 'calendar-week';
-
-          // Check if this week has been lived
-          if (weekEnd <= now) {
-            weekElement.classList.add('lived');
-            totalWeeksLived++;
-          } else if (weekStart <= now && now < weekEnd) {
-            weekElement.classList.add('current');
-            totalWeeksLived++;
-          } else {
-            weekElement.classList.add('remaining');
-          }
-
-          yearContainer.appendChild(weekElement);
-        }
-
-        grid.appendChild(yearContainer);
-      }
-
-      // Calculate total possible weeks
-      const lifespanEnd = new Date(birth);
-      lifespanEnd.setFullYear(birth.getFullYear() + lifespanYears);
-      const totalWeeks = Math.round((lifespanEnd - birth) / (1000 * 60 * 60 * 24 * 7));
-
-      // Update stats
-      const yearsLived = Math.floor(totalWeeksLived / 52.14); // Approximate
-      const yearsRemaining = lifespanYears - yearsLived;
-      const percentageLived = ((totalWeeksLived / totalWeeks) * 100).toFixed(1);
-
-      document.getElementById('weeks-lived').textContent = totalWeeksLived.toLocaleString();
-      document.getElementById('total-weeks').textContent = totalWeeks.toLocaleString();
-      document.getElementById('years-lived').textContent = yearsLived;
-      document.getElementById('years-remaining').textContent = yearsRemaining;
-      document.getElementById('percentage-lived').textContent = percentageLived + '%';
-    }
-
-    // Event listener for calendar update
-    document.getElementById('update-calendar').addEventListener('click', function() {
-      const birthdate = document.getElementById('birthdate').value;
-      const lifespan = parseInt(document.getElementById('lifespan').value);
-      generateCalendar(birthdate, lifespan);
-    });
-
-    // Initial setup
-    initSidebarToggle();
-    initThemeToggle();
-    setDateTime();
-    setProgress(false);
-    setDailyQuote();
-    renderSheetTabs();
-    renderSheet();
-    loadGoals();
-    document.addEventListener('lifeIsShortDataReady', () => {
-      renderSheetTabs();
-      renderSheet();
-      loadGoals();
-    });
+      [title, body].forEach((element) => element.addEventListener('input', updateNote));
+      document.querySelectorAll('[data-command]').forEach((button) => button.addEventListener('click', () => {
+        document.execCommand(button.dataset.command, false, button.dataset.value || null);
+        body.focus();
+        updateNote();
+      }));
+
+      renderList();
+      if (activeId) openNote(activeId); else createNote();
+    })();
   </script>
 </body>
 </html>
