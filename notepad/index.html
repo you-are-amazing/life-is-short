@@ -33,8 +33,11 @@
     .empty-list { padding: 12px; color: var(--muted); font-size: 13px; }
     main { display: flex; flex-direction: column; min-width: 0; }
     .topbar { display: flex; align-items: center; justify-content: space-between; padding: 22px 6vw; border-bottom: 1px solid var(--line); background: var(--paper); }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; }
     .back-link { font-size: 14px; }
     .save-state { color: var(--muted); font-size: 13px; }
+    #theme-toggle { width: 38px; height: 38px; border: 2px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--paper); cursor: pointer; box-shadow: var(--shadow); font-size: 16px; }
+    #theme-toggle:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.05); }
     .editor-wrap { width: min(850px, calc(100% - 48px)); margin: 0 auto; padding: 68px 0 100px; }
     #note-title { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; font: 700 clamp(28px, 5vw, 48px) 'Inter', sans-serif; }
     #note-title::placeholder { color: var(--muted); }
@@ -60,7 +63,7 @@
       <div id="note-list" aria-label="Saved notes"></div>
     </aside>
     <main>
-      <header class="topbar"><a class="back-link" href="../">&larr; Back to Life is Short</a><span class="save-state" id="save-state">Saved locally</span></header>
+      <header class="topbar"><a class="back-link" href="../">&larr; Back to Life is Short</a><div class="topbar-actions"><span class="save-state" id="save-state">Saved locally</span><button id="theme-toggle" type="button" title="Switch to light mode" aria-label="Switch to light mode" aria-pressed="true">&#9788;</button></div></header>
       <section class="editor-wrap" aria-label="Note editor">
         <input id="note-title" type="text" maxlength="120" placeholder="Untitled note" aria-label="Note title">
         <div class="meta" id="note-date"></div>
@@ -79,6 +82,7 @@
   </div>
   <script>
     (() => {
+      const themeToggle = document.getElementById('theme-toggle');
       const storageKey = 'life_notes';
       const title = document.getElementById('note-title');
       const body = document.getElementById('note-body');
@@ -88,6 +92,15 @@
       const state = document.getElementById('save-state');
       let notes = loadNotes();
       let activeId = notes[0]?.id || null;
+
+      function applyTheme(theme) {
+        const isDark = theme === 'dark';
+        document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+        themeToggle.textContent = isDark ? '\u2600' : '\u263e';
+        themeToggle.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+        themeToggle.setAttribute('aria-label', themeToggle.title);
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+      }
 
       function loadNotes() {
         try {
@@ -159,6 +172,12 @@
       }
 
       document.getElementById('new-note').addEventListener('click', createNote);
+      applyTheme(localStorage.getItem('theme') || 'dark');
+      themeToggle.addEventListener('click', () => {
+        const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', nextTheme);
+        applyTheme(nextTheme);
+      });
       document.getElementById('delete-note').addEventListener('click', () => {
         if (!activeNote() || !window.confirm('Delete this note?')) return;
         notes = notes.filter((note) => note.id !== activeId);
