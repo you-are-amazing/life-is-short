@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notepad - Life is Short</title>
+  <meta name="description" content="Write, organize, and revisit your personal notes.">
+  <link rel="icon" href="../lifeisshort.png" type="image/png">
+  <link rel="stylesheet" href="../static/css/style.css?v=18">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+  <script src="../static/js/auth.js?v=5" defer></script>
+  <style>
+    :root { --ink: #1e293b; --muted: #64748b; --paper: #ffffff; --line: #e2e8f0; --accent: #6366f1; --accent-soft: #eef2ff; --canvas: #f8fafc; --accent-dark: #4f46e5; --surface-hover: #f1f5f9; --shadow: 0 4px 12px rgba(15, 23, 42, .08); }
+    [data-theme="dark"] { --ink: #f9fafb; --muted: #d1d5db; --paper: #1f2937; --line: #4b5563; --accent-soft: #312e81; --canvas: #111827; --surface-hover: #374151; --shadow: 0 4px 12px rgba(0, 0, 0, .28); }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--canvas); font-family: 'Inter', sans-serif; }
+    .app-shell { display: grid; grid-template-columns: 270px 1fr; min-height: 100vh; transition: grid-template-columns .2s ease; }
+    .app-shell.sidebar-hidden { grid-template-columns: 0 1fr; }
+    aside { position: relative; display: flex; flex-direction: column; height: 100%; border-right: 1px solid var(--line); background: var(--paper); box-shadow: var(--shadow); overflow: hidden; }
+    .app-shell.sidebar-hidden aside { border-right: 0; box-shadow: none; }
+    .app-shell.sidebar-hidden aside > * { display: none; }
+    .sidebar-scroll { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 24px 22px 16px; }
+    .brand { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 22px; }
+    .brand strong { color: var(--accent); font: 700 20px 'Inter', sans-serif; }
+    .new-note { display: block; width: 100%; border: 0; border-radius: 6px; padding: 13px 16px; margin-bottom: 26px; color: white; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); font: 600 14px 'Inter', sans-serif; cursor: pointer; box-shadow: var(--shadow); }
+    .new-note:hover { background: linear-gradient(135deg, var(--accent-dark), var(--accent)); }
+    .icon-btn { flex: none; width: 42px; height: 42px; border: 2px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--paper); cursor: pointer; box-shadow: var(--shadow); font-size: 16px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.05); }
+    .icon-btn svg { width: 16px; height: 16px; display: block; }
+    .icon-btn-sm { width: 34px; height: 34px; font-size: 14px; }
+    .notes-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    #note-list { display: grid; gap: 4px; min-width: 0; }
+    .note-item { display: flex; align-items: center; gap: 6px; width: 100%; min-width: 0; padding: 6px 6px 6px 12px; border: 0; border-radius: 5px; color: var(--ink); background: transparent; }
+    .note-item:hover, .note-item.active { background: var(--accent-soft); color: var(--ink); }
+    .note-item-main { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 5px 0; color: inherit; cursor: pointer; font: inherit; }
+    .note-item-main strong, .note-item-main span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .note-item-main strong { margin-bottom: 3px; font-size: 14px; }
+    .note-item-main span { color: var(--muted); font-size: 12px; }
+    .note-item-delete { flex: none; width: 24px; height: 24px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+    .note-item-delete:hover { background: #ef4444; color: white; }
+    .empty-list { padding: 12px; color: var(--muted); font-size: 13px; }
+    .sidebar-footer { flex: none; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-top: 1px solid var(--line); background: var(--paper); }
+    main { display: flex; flex-direction: column; min-width: 0; position: relative; }
+    .sidebar-reveal { display: none; position: fixed; top: 22px; left: 14px; z-index: 5; }
+    .app-shell.sidebar-hidden .sidebar-reveal { display: flex; }
+    .editor-wrap { width: min(850px, calc(100% - 48px)); margin: 0 auto; padding: 68px 0 100px; }
+    #note-title { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; font: 700 clamp(28px, 5vw, 48px) 'Inter', sans-serif; }
+    #note-title::placeholder { color: var(--muted); }
+    .meta { margin: 12px 0 26px; color: var(--muted); font-size: 13px; }
+    .toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .toolbar button { min-width: 34px; height: 32px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: var(--paper); font-weight: 700; cursor: pointer; box-shadow: var(--shadow); }
+    .toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+    #note-body { min-height: 420px; outline: 0; color: var(--ink); font: 400 17px/1.85 'Inter', sans-serif; }
+    #note-body:empty::before { content: 'Begin writing...'; color: var(--muted); pointer-events: none; }
+    #note-body blockquote { margin: 20px 0; padding-left: 18px; border-left: 3px solid var(--accent); color: var(--muted); }
+    /* Highlight is a fixed-contrast mark: always readable regardless of light/dark theme */
+    #note-body mark.note-highlight { background: #f8d878; color: #1e293b; padding: 0 1px; border-radius: 2px; }
+    @media (max-width: 700px) {
+      .app-shell { display: block; }
+      .app-shell.sidebar-hidden aside { display: none; }
+      aside { height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .sidebar-scroll { padding: 18px; max-height: 40vh; }
+      .brand { margin-bottom: 14px; }
+      #note-list { display: flex; overflow-x: auto; }
+      .note-item { min-width: 190px; }
+      .editor-wrap { padding-top: 42px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" id="app-shell">
+    <button class="icon-btn sidebar-reveal" id="sidebar-reveal" type="button" title="Show sidebar" aria-label="Show sidebar">&raquo;</button>
+    <aside>
+      <div class="sidebar-scroll">
+        <div class="brand">
+          <strong>Life is Short</strong>
+          <a href="../" class="icon-btn icon-btn-sm" title="Home" aria-label="Back to home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 9.5 12 3l9 6.5"></path>
+              <path d="M5 9.5V21h14V9.5"></path>
+              <path d="M9 21v-6h6v6"></path>
+            </svg>
+          </a>
+        </div>
+        <button class="new-note" id="new-note" type="button">+ New note</button>
+        <div class="notes-heading"><span>Your notes</span><span id="note-count">0</span></div>
+        <div id="note-list" aria-label="Saved notes"></div>
+      </div>
+      <div class="sidebar-footer">
+        <button class="icon-btn" id="theme-toggle" type="button" title="Switch to light mode" aria-label="Switch to light mode" aria-pressed="true">&#9788;</button>
+        <button class="icon-btn" id="sidebar-hide" type="button" title="Hide sidebar" aria-label="Hide sidebar">&laquo;</button>
+      </div>
+    </aside>
+    <main>
+      <section class="editor-wrap" aria-label="Note editor">
+        <input id="note-title" type="text" maxlength="120" placeholder="Untitled note" aria-label="Note title">
+        <div class="meta" id="note-date"></div>
+        <div class="toolbar" role="toolbar" aria-label="Text formatting">
+          <button type="button" data-command="bold" aria-label="Bold">B</button>
+          <button type="button" data-command="italic" aria-label="Italic"><i>I</i></button>
+          <button type="button" data-command="underline" aria-label="Underline"><u>U</u></button>
+          <button type="button" data-command="insertUnorderedList" aria-label="Bulleted list">&bull;</button>
+          <button type="button" data-command="formatBlock" data-value="blockquote" aria-label="Quote">&ldquo;</button>
+          <button type="button" id="highlight-btn" aria-label="Highlight">Highlight</button>
+        </div>
+        <article id="note-body" contenteditable="true" role="textbox" aria-label="Note body"></article>
+      </section>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const appShell = document.getElementById('app-shell');
+      const themeToggle = document.getElementById('theme-toggle');
+      const sidebarHideBtn = document.getElementById('sidebar-hide');
+      const sidebarRevealBtn = document.getElementById('sidebar-reveal');
+      const highlightBtn = document.getElementById('highlight-btn');
+      const storageKey = 'life_notes';
+      const sidebarKey = 'notepad_sidebar_hidden';
+      const title = document.getElementById('note-title');
+      const body = document.getElementById('note-body');
+      const list = document.getElementById('note-list');
+      const count = document.getElementById('note-count');
+      const date = document.getElementById('note-date');
+      let notes = loadNotes();
+      let activeId = notes[0]?.id || null;
+
+      function applyTheme(theme) {
+        const isDark = theme === 'dark';
+        document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+        themeToggle.textContent = isDark ? '\u2600' : '\u263e';
+        themeToggle.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+        themeToggle.setAttribute('aria-label', themeToggle.title);
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+      }
+
+      function applySidebar(hidden) {
+        appShell.classList.toggle('sidebar-hidden', hidden);
+      }
+
+      // Normalizes any legacy/malformed note objects (e.g. missing "body")
+      // so old localStorage data never crashes rendering.
+      function loadNotes() {
+        try {
+          const value = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          if (!Array.isArray(value)) return [];
+          return value.map((n) => ({
+            id: n && n.id ? n.id : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            title: (n && typeof n.title === 'string') ? n.title : '',
+            body: (n && typeof n.body === 'string') ? n.body : '',
+            updatedAt: (n && n.updatedAt) ? n.updatedAt : new Date().toISOString(),
+          }));
+        } catch (error) { return []; }
+      }
+
+      function activeNote() { return notes.find((note) => note.id === activeId); }
+
+      function saveNotes() {
+        localStorage.setItem(storageKey, JSON.stringify(notes));
+        renderList();
+      }
+
+      function renderList() {
+        count.textContent = notes.length;
+        list.replaceChildren();
+        if (!notes.length) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-list';
+          empty.textContent = 'Your notes will appear here.';
+          list.appendChild(empty);
+          return;
+        }
+        notes.forEach((note) => {
+          const item = document.createElement('div');
+          item.className = `note-item${note.id === activeId ? ' active' : ''}`;
+
+          const main = document.createElement('button');
+          main.type = 'button';
+          main.className = 'note-item-main';
+          const heading = document.createElement('strong');
+          heading.textContent = note.title || 'Untitled note';
+          const preview = document.createElement('span');
+          preview.textContent = (note.body || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || 'Empty note';
+          main.append(heading, preview);
+          main.addEventListener('click', () => openNote(note.id));
+
+          const del = document.createElement('button');
+          del.type = 'button';
+          del.className = 'note-item-delete';
+          del.setAttribute('aria-label', 'Delete note');
+          del.title = 'Delete note';
+          del.textContent = '\u00d7';
+          del.addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteNote(note.id);
+          });
+
+          item.append(main, del);
+          list.appendChild(item);
+        });
+      }
+
+      function openNote(id) {
+        activeId = id;
+        const note = activeNote();
+        if (!note) return;
+        title.value = note.title || '';
+        body.innerHTML = note.body || '';
+        date.textContent = `Last edited ${new Date(note.updatedAt).toLocaleString()}`;
+        renderList();
+      }
+
+      function createNote() {
+        const now = new Date().toISOString();
+        const note = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, title: '', body: '', updatedAt: now };
+        notes.unshift(note);
+        activeId = note.id;
+        saveNotes();
+        openNote(note.id);
+        title.focus();
+      }
+
+      function updateNote() {
+        const note = activeNote();
+        if (!note) return;
+        note.title = title.value;
+        note.body = body.innerHTML;
+        note.updatedAt = new Date().toISOString();
+        date.textContent = `Last edited ${new Date(note.updatedAt).toLocaleString()}`;
+        saveNotes();
+      }
+
+      function deleteNote(id) {
+        if (!window.confirm('Delete this note?')) return;
+        notes = notes.filter((note) => note.id !== id);
+        if (activeId === id) {
+          activeId = notes[0]?.id || null;
+          if (activeId) {
+            saveNotes();
+            openNote(activeId);
+          } else {
+            saveNotes();
+            title.value = '';
+            body.innerHTML = '';
+            date.textContent = '';
+            renderList();
+          }
+        } else {
+          saveNotes();
+        }
+      }
+
+      // --- Highlight: implemented as a real toggle using a <mark> wrapper
+      // with fixed colors, so it stays readable in both themes and can be
+      // switched back off (unlike the browser's plain hiliteColor command).
+      function closestHighlight(node) {
+        while (node && node !== body) {
+          if (node.nodeType === 1 && node.tagName === 'MARK' && node.classList.contains('note-highlight')) return node;
+          node = node.parentNode;
+        }
+        return null;
+      }
+
+      function unwrapMark(mark) {
+        const parent = mark.parentNode;
+        while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+        parent.removeChild(mark);
+      }
+
+      function toggleHighlight() {
+        const sel = window.getSelection();
+        if (!sel.rangeCount || sel.isCollapsed) { body.focus(); return; }
+        const range = sel.getRangeAt(0);
+        if (!body.contains(range.commonAncestorContainer)) { body.focus(); return; }
+
+        const existingMark = closestHighlight(sel.anchorNode);
+
+        if (existingMark) {
+          unwrapMark(existingMark);
+        } else {
+          const mark = document.createElement('mark');
+          mark.className = 'note-highlight';
+          try {
+            range.surroundContents(mark);
+          } catch (error) {
+            const frag = range.extractContents();
+            mark.appendChild(frag);
+            range.insertNode(mark);
+          }
+        }
+        sel.removeAllRanges();
+        body.focus();
+        updateNote();
+      }
+
+      document.getElementById('new-note').addEventListener('click', createNote);
+
+      applyTheme(localStorage.getItem('theme') || 'dark');
+      themeToggle.addEventListener('click', () => {
+        const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', nextTheme);
+        applyTheme(nextTheme);
+      });
+
+      applySidebar(localStorage.getItem(sidebarKey) === '1');
+      sidebarHideBtn.addEventListener('click', () => {
+        localStorage.setItem(sidebarKey, '1');
+        applySidebar(true);
+      });
+      sidebarRevealBtn.addEventListener('click', () => {
+        localStorage.setItem(sidebarKey, '0');
+        applySidebar(false);
+      });
+
+      [title, body].forEach((element) => element.addEventListener('input', updateNote));
+      highlightBtn.addEventListener('click', toggleHighlight);
+      document.querySelectorAll('[data-command]').forEach((button) => button.addEventListener('click', () => {
+        document.execCommand(button.dataset.command, false, button.dataset.value || null);
+        body.focus();
+        updateNote();
+      }));
+
+      document.addEventListener('lifeIsShortDataReady', () => {
+        notes = loadNotes();
+        activeId = notes[0]?.id || null;
+        renderList();
+        if (activeId) openNote(activeId);
+        else {
+          title.value = '';
+          body.innerHTML = '';
+          date.textContent = '';
+        }
+      });
+
+      renderList();
+      if (activeId) openNote(activeId); else createNote();
+    })();
+  </script>
+</body>
+</html>
